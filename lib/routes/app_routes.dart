@@ -4,5 +4,6 @@ class AppRoutes {
   static const register = '/register';
   static const landing = '/landing';
   static const profile = '/profile';
+  static const auctionsMenu = '/auctions/menu';
   // tambahkan route lain sesuai kebutuhan
 }
