@@ -1,4 +1,3 @@
-// providers/product_provider.dart
 import 'package:flutter/material.dart';
 import '../services/auction_service.dart';
 import '../models/auction_item.dart';

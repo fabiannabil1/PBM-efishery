@@ -29,7 +29,8 @@ class AuthProvider with ChangeNotifier {
 
     if (response['success']) {
       _token = response['token'];
-      await sharedPreferences.setString('token', _token!);
+      // print('Token: $_token'); // Debugging untuk melihat token yang diterima
+      await sharedPreferences.setString('auth_token', _token!);
       notifyListeners();
       return true;
     } else {
@@ -68,7 +69,7 @@ class AuthProvider with ChangeNotifier {
 
   void logout() {
     _token = null;
-    sharedPreferences.remove('token');
+    sharedPreferences.remove('auth_token');
     notifyListeners();
   }
 }

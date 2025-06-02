@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'providers/auth_provider.dart';
+import 'providers/auction_provider.dart';
+
 import 'routes/app_routes.dart';
 import 'routes/route_generator.dart';
 import 'utils/constants.dart';
@@ -29,7 +31,10 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => AuthProvider(sharedPreferences: sharedPreferences),
         ),
-        // Add other providers here as needed
+        ChangeNotifierProvider(
+          create: (_) => AuctionProvider(),
+          // Add other providers here as needed
+        ),
       ],
       child: MyApp(initialToken: token),
     ),
@@ -51,7 +56,6 @@ class MyApp extends StatelessWidget {
       initialRoute: initialToken != null ? AppRoutes.home : AppRoutes.landing,
 
       // initialRoute: AppRoutes.profile,
-      
       onGenerateRoute: RouteGenerator.generateRoute,
       navigatorKey: Constants.navigatorKey,
 

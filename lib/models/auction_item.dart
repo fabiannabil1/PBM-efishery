@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class AuctionItem {
   final int id;
   final String title;
@@ -30,23 +32,36 @@ class AuctionItem {
   });
 
   factory AuctionItem.fromJson(Map<String, dynamic> json) {
+    DateTime parseDate(String dateStr) {
+      try {
+        return DateTime.parse(dateStr);
+      } catch (_) {
+        // Try parsing RFC 1123 format like "Tue, 03 Jun 2025 00:23:11 GMT"
+        return DateFormat(
+          "EEE, dd MMM yyyy HH:mm:ss 'GMT'",
+          'en_US',
+        ).parseUtc(dateStr);
+      }
+    }
+
     return AuctionItem(
-      id: json['id'],
-      title: json['title'],
-      description: json['description'],
-      imageUrl: json['image_url'],
-      status: json['status'],
-      currentPrice: json['current_price'],
-      startingPrice: json['starting_price'],
-      createdAt: DateTime.parse(json['created_at']),
-      deadline: DateTime.parse(json['deadline']),
-      locationId: json['location_id'],
-      locationName: json['location_name'],
-      userId: json['user_id'],
-      winnerId: json['winner_id'],
+      id: json['id'] ?? 0, // Default to 0 if null
+      title: json['title'] ?? '', // Default to empty string if null
+      description: json['description'] ?? '',
+      imageUrl: json['image_url'] ?? '', // Default to empty string if null
+      status: json['status'] ?? '',
+      currentPrice: json['current_price'] ?? '0',
+      startingPrice: json['starting_price'] ?? '0',
+      createdAt: parseDate(
+        json['created_at'] ?? DateTime.now().toIso8601String(),
+      ),
+      deadline: parseDate(json['deadline'] ?? DateTime.now().toIso8601String()),
+      locationId: json['location_id'] ?? 0,
+      locationName: json['location_name'] ?? '',
+      userId: json['user_id'] ?? 0,
+      winnerId: json['winner_id'], // Nullable, no default needed
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
       'id': id,

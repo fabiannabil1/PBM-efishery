@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auction_provider.dart';
-import '../../widgets/auction_card.dart';
-import '../../widgets/auction_search_bar.dart';
+import '../../models/auction_item.dart';
 
 class AuctionMenuScreen extends StatefulWidget {
   const AuctionMenuScreen({super.key});
@@ -12,79 +11,116 @@ class AuctionMenuScreen extends StatefulWidget {
 }
 
 class _AuctionMenuScreenState extends State<AuctionMenuScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
+  bool _isInit = true;
 
   @override
-  void initState() {
-    super.initState();
-    Future.microtask(
-      () =>
-          Provider.of<AuctionProvider>(
-            context,
-            listen: false,
-          ).loadAuctionItems(),
-    );
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (_isInit) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final provider = Provider.of<AuctionProvider>(context, listen: false);
+        if (provider.products.isEmpty && !provider.isLoading) {
+          provider.loadAuctionItems();
+        }
+      });
+      _isInit = false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuctionProvider>(
-      builder: (context, provider, _) {
-        final auctions =
-            provider.products.where((auction) {
-              final query = _searchQuery.toLowerCase();
-              return auction.title.toLowerCase().contains(query) ||
-                  auction.locationName.toLowerCase().contains(query);
-            }).toList();
+    final provider = Provider.of<AuctionProvider>(context);
 
-        return Column(
-          children: [
-            AuctionSearchBar(
-              controller: _searchController,
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
-              onFilterTap: () {
-                // Implement filter logic if needed
-              },
-            ),
-            Expanded(
-              child:
-                  provider.isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : auctions.isEmpty
-                      ? const Center(child: Text('Tidak ada lelang ditemukan.'))
-                      : GridView.builder(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              mainAxisSpacing: 12,
-                              crossAxisSpacing: 12,
-                              childAspectRatio: 0.75,
-                            ),
-                        itemCount: auctions.length,
-                        itemBuilder: (context, index) {
-                          final auction = auctions[index];
-                          return AuctionCard(
-                            auction: auction,
-                            onTap: () {
-                              // Implement navigation to auction detail if needed
-                            },
-                          );
-                        },
-                      ),
-            ),
-          ],
-        );
-      },
+    return Scaffold(
+      appBar: AppBar(title: const Text("Daftar Lelang")),
+      body:
+          provider.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GridView.builder(
+                  itemCount: provider.products.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2, // 2 kolom
+                    childAspectRatio: 0.75,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                  ),
+                  itemBuilder: (context, index) {
+                    final auction = provider.products[index];
+                    return AuctionCard(item: auction);
+                  },
+                ),
+              ),
     );
   }
 }
-// You can use AuctionMenuScreen as a widget in your app's navigation or as a body in a Scaffold elsewhere. );
+
+class AuctionCard extends StatelessWidget {
+  final AuctionItem item;
+
+  const AuctionCard({super.key, required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            child: Image.network(
+              item.imageUrl,
+              height: 120,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder:
+                  (context, error, stackTrace) =>
+                      const Icon(Icons.broken_image, size: 120),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              item.title,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              item.locationName,
+              style: const TextStyle(color: Colors.grey),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text("Harga: Rp${item.currentPrice}"),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              "Tutup: ${item.deadline.toLocal().toString().split(' ').first}",
+            ),
+          ),
+          const Spacer(),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              item.status.toUpperCase(),
+              style: TextStyle(
+                color: item.status == 'open' ? Colors.green : Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

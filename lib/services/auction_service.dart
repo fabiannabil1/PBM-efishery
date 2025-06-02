@@ -3,12 +3,21 @@ import 'package:efishery/models/auction_item.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../utils/constants.dart';
+import '../utils/token_storage.dart';
 
 class AuctionService {
   static final String _baseUrl = Constants.apiUrl;
-
   Future<List<AuctionItem>> fetchAuctions() async {
-    final response = await http.get(Uri.parse('$_baseUrl/api/auctions'));
+    final token = await TokenStorage.getToken();
+    final response = await http.get(
+      Uri.parse('$_baseUrl/api/auctions'),
+      headers: {
+        // 'Content-Type': 'application/json',
+        if (token != null)
+          'Authorization': 'Bearer $token', // Tambahkan token jika diperlukan
+      },
+    );
+    print('Response status: ${response.statusCode}');
 
     if (response.statusCode == 200) {
       List data = jsonDecode(response.body);
