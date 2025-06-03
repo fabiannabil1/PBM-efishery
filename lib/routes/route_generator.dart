@@ -6,6 +6,11 @@ import '../screens/auth/login_screen.dart';
 import '../screens/Home/home_screen.dart';
 import '../screens/profile_screen/profile_screen.dart';
 import '../screens/Auctions/auction_menu_screen.dart';
+import '../screens/Market/market_screen.dart';
+import '../screens/Auctions/auction_detail_screen.dart';
+import '../models/auction_item.dart'; // Make sure this path matches where AuctionItem is defined
+
+import '../utils/token_storage.dart';
 
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -27,6 +32,19 @@ class RouteGenerator {
 
       case AppRoutes.auctionsMenu:
         return MaterialPageRoute(builder: (_) => const AuctionMenuScreen());
+
+      case AppRoutes.market:
+        return MaterialPageRoute(builder: (_) => const MarketScreen());
+
+      case AppRoutes.logout:
+        TokenStorage.deleteToken();
+        return MaterialPageRoute(builder: (_) => const LandingScreen());
+
+      case AppRoutes.auctionsDetail:
+        final item = settings.arguments as AuctionItem;
+        return MaterialPageRoute(
+          builder: (_) => AuctionDetailScreen(item: item),
+        );
 
       // Tambahkan route lainnya di sini
       default:

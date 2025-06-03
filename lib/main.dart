@@ -24,6 +24,7 @@ void main() async {
   // Initialize app-wide dependencies
   final sharedPreferences = await SharedPreferences.getInstance();
   final token = await TokenStorage.getToken();
+  // print('Initial Token: $token'); // Debugging to see the initial token
 
   runApp(
     MultiProvider(

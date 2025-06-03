@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../widgets/custom-appbar.dart';
+import '../../widgets/navbar.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -12,6 +14,7 @@ class ProfileScreen extends StatelessWidget {
     final String role = "User";
 
     return Scaffold(
+      appBar: const CustomAppBar(title: 'Profile', showBackButton: false),
       body: Stack(
         children: [
           // Blue gradient background
@@ -40,31 +43,14 @@ class ProfileScreen extends StatelessWidget {
                       horizontal: 16,
                       vertical: 8,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.arrow_back_ios,
-                            color: Colors.white,
-                          ),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                        const Text(
-                          'Profile',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.white),
-                          onPressed: () {
-                            // TODO: Implement edit profile
-                          },
-                        ),
-                      ],
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.white),
+                        onPressed: () {
+                          // TODO: Implement edit profile
+                        },
+                      ),
                     ),
                   ),
 
@@ -177,7 +163,10 @@ class ProfileScreen extends StatelessWidget {
                           const SizedBox(height: 32),
                           ElevatedButton.icon(
                             onPressed: () {
-                              // TODO: Implement logout functionality
+                              Navigator.pushReplacementNamed(
+                                context,
+                                '/logout',
+                              );
                             },
                             icon: const Icon(Icons.logout),
                             label: const Text('Logout'),
@@ -207,6 +196,20 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: BottomNav(
+        currentIndex: 3,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacementNamed(context, '/home');
+          } else if (index == 1) {
+            Navigator.pushReplacementNamed(context, '/market');
+          } else if (index == 2) {
+            Navigator.pushReplacementNamed(context, '/auctions/menu');
+          } else if (index == 3) {
+            // Already in Profile
+          }
+        },
       ),
     );
   }

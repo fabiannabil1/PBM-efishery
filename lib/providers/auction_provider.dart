@@ -18,7 +18,7 @@ class AuctionProvider with ChangeNotifier {
     try {
       _auctions = await _auctionService.fetchAuctions();
     } catch (e) {
-      print('Error: $e');
+      // print('Error: $e');
     }
 
     _isLoading = false;

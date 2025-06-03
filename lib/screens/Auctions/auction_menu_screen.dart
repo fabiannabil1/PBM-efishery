@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auction_provider.dart';
-import '../../models/auction_item.dart';
+import '../../widgets/auction/auction_card.dart';
+import '../../widgets/custom-appbar.dart';
+import '../../widgets/navbar.dart';
 
 class AuctionMenuScreen extends StatefulWidget {
   const AuctionMenuScreen({super.key});
@@ -16,7 +18,6 @@ class _AuctionMenuScreenState extends State<AuctionMenuScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
     if (_isInit) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final provider = Provider.of<AuctionProvider>(context, listen: false);
@@ -33,7 +34,7 @@ class _AuctionMenuScreenState extends State<AuctionMenuScreen> {
     final provider = Provider.of<AuctionProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Daftar Lelang")),
+      appBar: const CustomAppBar(title: 'Menu Lelang', showBackButton: true),
       body:
           provider.isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -42,7 +43,7 @@ class _AuctionMenuScreenState extends State<AuctionMenuScreen> {
                 child: GridView.builder(
                   itemCount: provider.products.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2, // 2 kolom
+                    crossAxisCount: 2,
                     childAspectRatio: 0.75,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
@@ -53,73 +54,20 @@ class _AuctionMenuScreenState extends State<AuctionMenuScreen> {
                   },
                 ),
               ),
-    );
-  }
-}
-
-class AuctionCard extends StatelessWidget {
-  final AuctionItem item;
-
-  const AuctionCard({super.key, required this.item});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.network(
-              item.imageUrl,
-              height: 120,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder:
-                  (context, error, stackTrace) =>
-                      const Icon(Icons.broken_image, size: 120),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              item.title,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              item.locationName,
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text("Harga: Rp${item.currentPrice}"),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              "Tutup: ${item.deadline.toLocal().toString().split(' ').first}",
-            ),
-          ),
-          const Spacer(),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              item.status.toUpperCase(),
-              style: TextStyle(
-                color: item.status == 'open' ? Colors.green : Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
+      bottomNavigationBar: BottomNav(
+        currentIndex: 2, // Index untuk menu Lelang
+        onTap: (index) {
+          // Navigasi sesuai index
+          if (index == 0) {
+            Navigator.pushReplacementNamed(context, '/home');
+          } else if (index == 1) {
+            Navigator.pushReplacementNamed(context, '/market');
+          } else if (index == 2) {
+            // Sudah di halaman Lelang
+          } else if (index == 3) {
+            Navigator.pushReplacementNamed(context, '/profile');
+          }
+        },
       ),
     );
   }
