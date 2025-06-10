@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class ContinueButton extends StatelessWidget {
   final bool isEnabled;
   final Future<void> Function()? onPressed;
+  final String label;
 
   const ContinueButton({
     super.key,
     required this.isEnabled,
     required this.onPressed,
+    required this.label,
   });
 
   @override
@@ -19,7 +21,7 @@ class ContinueButton extends StatelessWidget {
         backgroundColor: isEnabled ? Colors.green : Colors.grey,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      child: const Text('Lanjutkan', style: TextStyle(fontSize: 16)),
+      child: Text(label, style: const TextStyle(fontSize: 16)),
     );
   }
 }

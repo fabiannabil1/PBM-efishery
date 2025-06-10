@@ -1,7 +1,7 @@
 import 'package:efishery/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../widgets/continue_button.dart';
+import '../../widgets/continue_button.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -140,6 +140,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ContinueButton(
                 isEnabled: isButtonEnabled,
                 onPressed: isButtonEnabled ? () => _submitRegister() : null,
+                label: 'Daftar',
               ),
             ],
           ),
