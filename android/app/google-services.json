@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "38222894322",
+    "project_id": "efishery-94496",
+    "storage_bucket": "efishery-94496.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:38222894322:android:88337b9678c3ec56586c6b",
+        "android_client_info": {
+          "package_name": "com.example.efishery"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClgoOBTbSktDGxgM-IK4J_j5lIAKbEFYQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
