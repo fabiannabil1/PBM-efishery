@@ -38,6 +38,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (success) {
       Navigator.pushReplacementNamed(context, '/home');
+<<<<<<< HEAD:lib/screens/auth/login_screen.dart
+      // Navigator.pushReplacementNamed(context, '/auctions/menu');
+=======
+>>>>>>> 6cbc70aa07882201b826153d62817e3cdabca32e:lib/screens/login_screen.dart
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(authProvider.errorMessage ?? 'Login gagal')),
@@ -108,6 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ContinueButton(
               isEnabled: isButtonEnabled,
               onPressed: isButtonEnabled ? _onContinuePressed : null,
+              label: 'Masuk',
             ),
 
             const SizedBox(height: 16),

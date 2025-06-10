@@ -140,6 +140,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ContinueButton(
                 isEnabled: isButtonEnabled,
                 onPressed: isButtonEnabled ? () => _submitRegister() : null,
+                label:' Daftar Akun Baru',
               ),
             ],
           ),

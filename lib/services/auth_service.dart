@@ -31,6 +31,24 @@ class AuthService {
     }
   }
 
+  // static Future<Map<String, dynamic>> logout() async {
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse('$_baseUrl/api/logout'),
+  //       headers: {'Content-Type': 'application/json'},
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       return {'success': true, 'message': 'Logout berhasil'};
+  //     } else {
+  //       final data = json.decode(response.body);
+  //       return {'success': false, 'message': data['error'] ?? 'Logout gagal'};
+  //     }
+  //   } catch (e) {
+  //     return {'success': false, 'message': 'Terjadi kesalahan: $e'};
+  //   }
+  // }
+
   static Future<Map<String, dynamic>> register(
     String name,
     String phone,
@@ -43,7 +61,8 @@ class AuthService {
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'name': name,
-          'nomor_hp':phone, // Jika backend pakai "username" sebagai field nomor HP
+          'nomor_hp':
+              phone, // Jika backend pakai "username" sebagai field nomor HP
           'password': password,
           'address': address,
           'role': 'biasa', // Jika ada field alamat, sesuaikan dengan backend

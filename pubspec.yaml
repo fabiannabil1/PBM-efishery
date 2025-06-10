@@ -38,6 +38,15 @@ dependencies:
   shared_preferences: ^2.5.3
   provider: ^6.1.5
   http_interceptor: ^2.0.0
+<<<<<<< HEAD
+  cached_network_image: ^3.4.1
+  intl: ^0.20.2
+  google_fonts: ^6.2.1
+  path: ^1.9.1
+  http_parser: ^4.1.2
+  image_picker: ^1.1.2
+=======
+>>>>>>> 6cbc70aa07882201b826153d62817e3cdabca32e
 
 dev_dependencies:
   flutter_test:
