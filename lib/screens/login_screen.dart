@@ -1,8 +1,8 @@
 import 'package:efishery/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../widgets/continue_button.dart';
-import '../../widgets/text_input.dart';
+import '../widgets/continue_button.dart';
+import '../widgets/text_input.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -37,8 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
-      // Navigator.pushReplacementNamed(context, '/home');
-      Navigator.pushReplacementNamed(context, '/auctions/menu');
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(authProvider.errorMessage ?? 'Login gagal')),
@@ -49,12 +48,11 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login Akun')),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           children: [
-            const SizedBox(height: 2),
+            const SizedBox(height: 20),
             Image.asset(
               'assets/images/petani-ikan.jpg',
               height: 250,
@@ -70,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
               'Silakan masuk atau daftar akun baru untuk bisa pakai seluruh fiturnya.',
               style: TextStyle(fontSize: 14, color: Colors.black54),
             ),
-
+            
             const SizedBox(height: 24),
             CustomInputField(
               controller: _phoneController,

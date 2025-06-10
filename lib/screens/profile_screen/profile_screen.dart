@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
-import '../../widgets/custom-appbar.dart';
-import '../../widgets/navbar.dart';
+import 'editprofile_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Mocked user data
-    final String name = "John Doe";
-    final String phone = "+62 812 3456 7890";
-    final String address = "Jl. Merdeka No. 123, Jakarta";
-    final String role = "User";
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
 
+class _ProfileScreenState extends State<ProfileScreen> {
+  // Data pengguna yang bisa diubah
+  String name = "John Doe";
+  String phone = "+62 812 3456 7890";
+  String address = "Jl. Merdeka No. 123, Jakarta";
+  String role = "User";
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Profile', showBackButton: false),
       body: Stack(
         children: [
           // Blue gradient background
@@ -25,8 +28,8 @@ class ProfileScreen extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color(0xFF1E88E5), // Darker blue
-                  Color(0xFF64B5F6), // Lighter blue
+                  Color(0xFF1E88E5),
+                  Color(0xFF64B5F6),
                 ],
               ),
             ),
@@ -37,20 +40,49 @@ class ProfileScreen extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  // App bar with back button
+                  // App bar
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.white),
-                        onPressed: () {
-                          // TODO: Implement edit profile
-                        },
-                      ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        const Text(
+                          'Profile',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.white),
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => EditProfileScreen(
+                                  name: name,
+                                  phone: phone,
+                                  address: address,
+                                ),
+                              ),
+                            );
+
+                            // Perbarui data setelah kembali dari edit screen
+                            if (result != null && result is Map<String, String>) {
+                              setState(() {
+                                name = result['name'] ?? name;
+                                phone = result['phone'] ?? phone;
+                                address = result['address'] ?? address;
+                              });
+                            }
+                          },
+                        ),
+                      ],
                     ),
                   ),
 
@@ -64,10 +96,7 @@ class ProfileScreen extends StatelessWidget {
                             Container(
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 4,
-                                ),
+                                border: Border.all(color: Colors.white, width: 4),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.2),
@@ -76,11 +105,9 @@ class ProfileScreen extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              child: CircleAvatar(
+                              child: const CircleAvatar(
                                 radius: 60,
-                                backgroundImage: AssetImage(
-                                  'assets/images/petani-ikan.jpg',
-                                ),
+                                backgroundImage: AssetImage('assets/images/petani-ikan.jpg'),
                               ),
                             ),
                             Positioned(
@@ -112,20 +139,14 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 6,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
                             role,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                            ),
+                            style: const TextStyle(color: Colors.white, fontSize: 14),
                           ),
                         ),
                       ],
@@ -163,28 +184,19 @@ class ProfileScreen extends StatelessWidget {
                           const SizedBox(height: 32),
                           ElevatedButton.icon(
                             onPressed: () {
-                              Navigator.pushReplacementNamed(
-                                context,
-                                '/logout',
-                              );
+                              // TODO: Implement logout
                             },
                             icon: const Icon(Icons.logout),
                             label: const Text('Logout'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red.shade400,
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 32,
-                                vertical: 12,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(24),
                               ),
                               elevation: 2,
-                              textStyle: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
@@ -196,20 +208,6 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
-      bottomNavigationBar: BottomNav(
-        currentIndex: 3,
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacementNamed(context, '/home');
-          } else if (index == 1) {
-            Navigator.pushReplacementNamed(context, '/market');
-          } else if (index == 2) {
-            Navigator.pushReplacementNamed(context, '/auctions/menu');
-          } else if (index == 3) {
-            // Already in Profile
-          }
-        },
       ),
     );
   }
@@ -255,10 +253,7 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
               ],
             ),
