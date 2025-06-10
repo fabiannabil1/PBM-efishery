@@ -5,7 +5,6 @@ import '../../widgets/auction/auction_card.dart';
 import '../../widgets/custom-appbar.dart';
 import '../../widgets/auction/auction_search_bar.dart';
 
-
 class MyAuction extends StatefulWidget {
   const MyAuction({super.key});
 
@@ -69,7 +68,7 @@ class _MyAuctionState extends State<MyAuction> {
                           final auction = filteredAuctions[index];
                           return AuctionCard(
                             item: auction,
-                            targetPage: '/my-auction/detail',
+                            targetPage: '/my-auction/info',
                           );
                         },
                       ),

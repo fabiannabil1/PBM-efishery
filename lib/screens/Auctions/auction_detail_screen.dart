@@ -18,6 +18,13 @@ class AuctionDetailScreen extends StatefulWidget {
 class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
   AuctionProvider? _auctionProvider;
 
+  static const List<Color> blueColors = [
+    Color(0xFF1E3A8A), // blue-800
+    Color(0xFF2563EB), // blue-600
+    Color(0xFF3B82F6), // blue-500
+    Color(0xFF60A5FA), // blue-400
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -178,10 +185,10 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  _buildInfoCard(
+                  _bidInfoCard(
                     context,
                     icon: Icons.monetization_on,
-                    title: 'Harga Saat Ini',
+                    title: 'Current Price - Tap to View Bids',
                     value: currencyFormat.format(
                       num.tryParse(item.currentPrice) ?? 0,
                     ),
@@ -191,6 +198,12 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                       fontSize: 18,
                       color: Colors.green[700],
                     ),
+                    onTap:
+                        () => Navigator.pushNamed(
+                          context,
+                          '/bid-list',
+                          arguments: item.id,
+                        ),
                   ),
                   const SizedBox(height: 12),
 
@@ -386,6 +399,73 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
           ),
           if (trailing != null) trailing,
         ],
+      ),
+    );
+  }
+
+  Widget _bidInfoCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String value,
+    required Color iconColor,
+    TextStyle? valueStyle,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: iconColor, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    value,
+                    style:
+                        valueStyle ??
+                        const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

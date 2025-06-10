@@ -6,16 +6,16 @@ import '../../providers/auction_provider.dart';
 import 'package:efishery/widgets/custom-appbar.dart';
 import 'package:efishery/widgets/continue_button.dart';
 
-class MyAuctionDetailScreen extends StatefulWidget {
+class MyAuctionUpdateScreen extends StatefulWidget {
   final AuctionItem item;
 
-  const MyAuctionDetailScreen({super.key, required this.item});
+  const MyAuctionUpdateScreen({super.key, required this.item});
 
   @override
-  State<MyAuctionDetailScreen> createState() => _MyAuctionDetailScreenState();
+  State<MyAuctionUpdateScreen> createState() => _MyAuctionUpdateScreenState();
 }
 
-class _MyAuctionDetailScreenState extends State<MyAuctionDetailScreen> {
+class _MyAuctionUpdateScreenState extends State<MyAuctionUpdateScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;

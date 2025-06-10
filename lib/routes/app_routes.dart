@@ -14,6 +14,8 @@ class AppRoutes {
   static const auctionsDetail = '/auction/detail';
   static const myAuction = '/my-auction';
   static const addAuction = '/add-auction';
-  static const myAuctionDetail = '/my-auction/detail';
+  static const myAuctionUpdate = '/my-auction/update';
+  static const myAuctionInfo = '/my-auction/info';
+  static const bidList = '/bid-list';
   // tambahkan route lain sesuai kebutuhan
 }

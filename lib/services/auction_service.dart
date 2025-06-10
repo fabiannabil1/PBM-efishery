@@ -1,5 +1,6 @@
 // services/product_service.dart
 import '../../models/auction_item.dart';
+import '../../models/bid_item.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../utils/constants.dart';
@@ -165,6 +166,50 @@ class AuctionService {
     } else {
       throw Exception(
         'Gagal update auction: ${response.statusCode} ${response.body}',
+      );
+    }
+  }
+
+  Future<bool> deleteAuction(int auctionId) async {
+    final token = await TokenStorage.getToken();
+    final response = await http.delete(
+      Uri.parse('$_baseUrl/api/auctions/$auctionId'),
+      headers: {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 204) {
+      return true;
+    } else if (response.statusCode == 403) {
+      throw Exception('Tidak diizinkan menghapus auction.');
+    } else if (response.statusCode == 404) {
+      throw Exception('Auction tidak ditemukan.');
+    } else {
+      throw Exception(
+        'Gagal menghapus auction: ${response.statusCode} ${response.body}',
+      );
+    }
+  }
+
+  //ini untuk mendapatkan bid dari auction tertentu
+  Future<List<BidItem>> fetchBidsForAuction(int auctionId) async {
+    final token = await TokenStorage.getToken();
+    final response = await http.get(
+      Uri.parse('$_baseUrl/api/auctions/$auctionId/bids'),
+      headers: {
+        'accept': '*/*',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      List data = jsonDecode(response.body);
+      return data.map((json) => BidItem.fromJson(json)).toList();
+    } else {
+      throw Exception(
+        'Gagal Memuat Bid untuk Lelang ID $auctionId: ${response.statusCode}',
       );
     }
   }

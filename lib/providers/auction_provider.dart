@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../services/auction_service.dart';
 import '../models/auction_item.dart';
+import '../models/bid_item.dart';
 
 class AuctionProvider with ChangeNotifier {
   final AuctionService _auctionService = AuctionService();
@@ -128,4 +129,24 @@ class AuctionProvider with ChangeNotifier {
       notifyListeners();
     });
   }
+
+  Future<List<BidItem>> fetchBidsForAuction(int auctionId) async {
+    try {
+      return await _auctionService.fetchBidsForAuction(auctionId);
+    } catch (e) {
+      rethrow;
+    }
+  }
+  Future<bool> deleteAuction(int auctionId) async {
+    try {
+      final result = await _auctionService.deleteAuction(auctionId);
+      await loadAuctionItems();
+      await loadMyAuctionItems();
+      return result;
+    } catch (e) {
+      rethrow;
+    }
+  }
+  
+
 }

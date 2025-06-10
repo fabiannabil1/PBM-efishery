@@ -14,10 +14,12 @@ import '../models/product.dart';
 import '../screens/Auctions/my_auction_screen.dart';
 import '../models/auction_item.dart'; // Make sure this path matches where AuctionItem is defined
 import '../screens/Auctions/add_auction_screen.dart';
-import '../screens/Auctions/my_auction_item_detail_screen.dart';
+import '../screens/Auctions/my_auction_item_update_screen.dart';
 import '../screens/Market/market_screen.dart';
 import '../screens/Auctions/auction_menu_screen.dart';
 import '../screens/Auctions/auction_detail_screen.dart';
+import '../screens/Auctions/my_auction_item_info.dart';
+import '../screens/Auctions/bid_list_screen.dart';
 
 import '../utils/token_storage.dart';
 
@@ -69,10 +71,10 @@ class RouteGenerator {
           builder: (_) => AuctionDetailScreen(item: item),
         );
 
-      case AppRoutes.myAuctionDetail:
+      case AppRoutes.myAuctionUpdate:
         final item = settings.arguments as AuctionItem;
         return MaterialPageRoute(
-          builder: (_) => MyAuctionDetailScreen(item: item),
+          builder: (_) => MyAuctionUpdateScreen(item: item),
         );
 
       case AppRoutes.auctionsMenu:
@@ -80,6 +82,18 @@ class RouteGenerator {
 
       case AppRoutes.market:
         return MaterialPageRoute(builder: (_) => const MarketScreen());
+
+      case AppRoutes.bidList:
+        final auctionId = settings.arguments as int;
+        return MaterialPageRoute(
+          builder: (_) => BidListScreen(auctionId: auctionId),
+        );
+
+      case AppRoutes.myAuctionInfo:
+        final item = settings.arguments as AuctionItem;
+        return MaterialPageRoute(
+          builder: (_) => MyAuctionInfoScreen(item: item),
+        );
 
       // Tambahkan route lainnya di sini
       default:
