@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
       darkTheme: _buildDarkTheme(),
       themeMode: ThemeMode.light, // or use system preference: ThemeMode.system
       // initialRoute: initialToken != null ? AppRoutes.home : AppRoutes.landing,
-      initialRoute: AppRoutes.profile,
+      initialRoute: AppRoutes.dashboardusers,
 
       onGenerateRoute: RouteGenerator.generateRoute,
       navigatorKey: Constants.navigatorKey,
