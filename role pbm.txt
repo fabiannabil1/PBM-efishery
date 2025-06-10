@@ -1,3 +1,0 @@
-admin 
-user 
-partner (mitra) (bisa upgrade menjadi partner)
