@@ -5,6 +5,7 @@ import '../../widgets/auction/auction_card.dart';
 import '../../widgets/custom-appbar.dart';
 import '../../widgets/auction/auction_search_bar.dart';
 
+
 class MyAuction extends StatefulWidget {
   const MyAuction({super.key});
 
@@ -32,8 +33,8 @@ class _MyAuctionState extends State<MyAuction> {
     final provider = Provider.of<AuctionProvider>(context);
 
     final filteredAuctions =
-        provider.auctions.where((auction) {
-          final title = MyAuction.title.toLowerCase();
+        provider.myAuctions.where((auction) {
+          final title = auction.title.toLowerCase();
           return title.contains(_searchQuery.toLowerCase());
         }).toList();
 
