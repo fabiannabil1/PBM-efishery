@@ -1,3 +1,7 @@
+// import 'dart:ffi';
+
+import 'package:efishery/screens/dashboard_screen_users/cart_screen/cart_screen.dart';
+import 'package:efishery/screens/dashboard_screen_users/product_screen/product_detail_screen.dart';
 import 'package:efishery/screens/landing_screen.dart';
 import 'package:efishery/screens/auth/register_screen.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +9,8 @@ import '../routes/app_routes.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/Home/home_screen.dart';
 import '../screens/profile_screen/profile_screen.dart';
+import '../screens/dashboard_screen_users/dashboard_screen.dart';
+import '../models/product.dart';
 import '../screens/Auctions/my_auction_screen.dart';
 import '../models/auction_item.dart'; // Make sure this path matches where AuctionItem is defined
 import '../screens/Auctions/add_auction_screen.dart';
@@ -36,6 +42,20 @@ class RouteGenerator {
 
       case AppRoutes.profile:
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
+
+      case AppRoutes.dashboardusers:
+        return MaterialPageRoute(builder: (_) => DashboardScreen());
+
+      case AppRoutes.cartpage:
+        return MaterialPageRoute(builder: (_) => CartScreen());
+
+      case AppRoutes.productdetails:
+        return MaterialPageRoute(
+          builder:
+              (_) => ProductDetailPage(
+                product: settings.arguments as ProductModel,
+              ),
+        );
 
       case AppRoutes.myAuction:
         return MaterialPageRoute(builder: (_) => const MyAuction());

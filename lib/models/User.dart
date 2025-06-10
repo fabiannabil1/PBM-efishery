@@ -3,7 +3,7 @@ class User {
   final String phone;
   final String password;
   final String? address;
-  final String  role;
+  final String role;
 
   User({
     required this.name,
