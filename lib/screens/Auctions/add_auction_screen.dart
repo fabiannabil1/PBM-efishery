@@ -31,7 +31,7 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
   static const Color primaryBlue = Color(0xFF1E88E5);
   static const Color lightBlue = Color(0xFF42A5F5);
   static const Color darkBlue = Color(0xFF1565C0);
-  static const Color accentBlue = Color(0xFF0D47A1);
+  // static const Color accentBlue = Color(0xFF0D47A1);
   static const Color backgroundBlue = Color(0xFFF3F8FF);
 
   @override

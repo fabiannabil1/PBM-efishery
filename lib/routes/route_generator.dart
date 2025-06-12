@@ -23,6 +23,7 @@ import '../screens/Auctions/bid_list_screen.dart';
 import '../screens/chat/chat_screen.dart';
 import '../utils/token_storage.dart';
 import '../providers/user_provider.dart';
+import '../screens/profile_screen/edit_profile_screen.dart';
 
 class RouteGenerator {
   static final GlobalKey<NavigatorState> navigatorKey =
@@ -168,6 +169,9 @@ class RouteGenerator {
 
       case AppRoutes.locationPicker:
         return MaterialPageRoute(builder: (_) => const LocationPickerScreen());
+
+      case AppRoutes.editProfile:
+        return MaterialPageRoute(builder: (_) => const EditProfileScreen());
 
       default:
         return MaterialPageRoute(

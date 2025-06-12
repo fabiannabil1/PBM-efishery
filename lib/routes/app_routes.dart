@@ -22,4 +22,5 @@ class AppRoutes {
   // tambahkan route lain sesuai kebutuhan
 
   static const locationPicker = '/location-picker';
+  static const editProfile = '/edit-profile';
 }
