@@ -38,6 +38,7 @@ class AuctionCard extends StatelessWidget {
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min, // Fix for bottom overflow
             children: [
               Stack(
                 children: [
@@ -52,7 +53,8 @@ class AuctionCard extends StatelessWidget {
                       fit: BoxFit.cover,
                       errorBuilder:
                           (context, error, stackTrace) => Container(
-                            height: 150,
+                            height:
+                                120, // Fixed: Changed from 150 to match image height
                             color: Colors.grey.shade200,
                             child: const Icon(Icons.broken_image, size: 50),
                           ),
@@ -83,70 +85,91 @@ class AuctionCard extends StatelessWidget {
                   ),
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.location_on,
-                          size: 16,
-                          color: Colors.grey,
+              Flexible(
+                // Added Flexible to prevent overflow
+                child: Padding(
+                  padding: const EdgeInsets.all(
+                    10.0,
+                  ), // Reduced from 12.0 to 10.0
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min, // Minimize space usage
+                    children: [
+                      Text(
+                        item.title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            item.locationName,
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 14,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 3), // Reduced from 4
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.location_on,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              item.locationName,
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize: 14,
+                              ),
+                              maxLines: 1, // Added to prevent overflow
+                              overflow:
+                                  TextOverflow
+                                      .ellipsis, // Added to prevent overflow
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      currencyFormat.format(
-                        double.parse(item.currentPrice.toString()),
+                        ],
                       ),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.access_time,
-                          size: 16,
-                          color: Colors.grey,
+                      const SizedBox(height: 3), // Reduced from 4
+                      Text(
+                        currencyFormat.format(
+                          double.parse(item.currentPrice.toString()),
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          "Berakhir: ${DateFormat('dd MMM yyyy').format(item.deadline.toLocal())}",
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 14,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                        maxLines: 1, // Added to prevent overflow
+                        overflow:
+                            TextOverflow.ellipsis, // Added to prevent overflow
+                      ),
+                      const SizedBox(height: 6), // Reduced from 8
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.access_time,
+                            size: 16,
+                            color: Colors.grey,
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                          const SizedBox(width: 4),
+                          Expanded(
+                            // Added Expanded to handle date overflow
+                            child: Text(
+                              "Berakhir: ${DateFormat('dd MMM yyyy').format(item.deadline.toLocal())}",
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize:
+                                    13, // Reduced from 14 to prevent overflow
+                              ),
+                              maxLines: 1, // Added to prevent overflow
+                              overflow:
+                                  TextOverflow
+                                      .ellipsis, // Added to handle long dates
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

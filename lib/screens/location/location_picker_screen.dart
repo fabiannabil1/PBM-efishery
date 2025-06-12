@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:efishery/widgets/custom_appbar.dart';
 
 class LocationPickerScreen extends StatefulWidget {
   const LocationPickerScreen({super.key});
@@ -18,6 +19,10 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
 
   // Default center to Indonesia
   final LatLng _defaultCenter = const LatLng(-2.548926, 118.014863);
+
+  // Custom FAB position (in pixels from edges)
+  final double _fabRight = 32; // Jarak dari kanan layar
+  final double _fabBottom = 64; // Jarak dari bawah layar
 
   @override
   void initState() {
@@ -47,6 +52,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
         _mapController.move(_selectedLocation!, 15);
       });
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error getting location: $e')));
@@ -67,22 +73,19 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pilih Lokasi'),
-        actions: [
-          if (_selectedLocation != null)
-            IconButton(
-              icon: const Icon(Icons.check),
-              onPressed: () {
-                // Return selected location to previous screen
-                Navigator.pop(context, {
-                  'latitude': _selectedLocation!.latitude,
-                  'longitude': _selectedLocation!.longitude,
-                  'address': _address,
-                });
-              },
-            ),
-        ],
+      appBar: CustomAppBar(
+        title: 'Pilih Lokasi',
+        showCheckButton: _selectedLocation != null,
+        onCheckPressed:
+            _selectedLocation != null
+                ? () {
+                  Navigator.pop(context, {
+                    'latitude': _selectedLocation!.latitude,
+                    'longitude': _selectedLocation!.longitude,
+                    'address': _address,
+                  });
+                }
+                : null,
       ),
       body: Stack(
         children: [
@@ -115,10 +118,12 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                 ),
             ],
           ),
+
           if (_isLoading) const Center(child: CircularProgressIndicator()),
+
           if (_selectedLocation != null)
             Positioned(
-              bottom: 16,
+              bottom: 48,
               left: 16,
               right: 16,
               child: Card(
@@ -139,11 +144,17 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                 ),
               ),
             ),
+
+          // Custom Positioned FloatingActionButton
+          Positioned(
+            right: _fabRight,
+            bottom: _fabBottom,
+            child: FloatingActionButton(
+              onPressed: _getCurrentLocation,
+              child: const Icon(Icons.my_location),
+            ),
+          ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _getCurrentLocation,
-        child: const Icon(Icons.my_location),
       ),
     );
   }

@@ -27,6 +27,13 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
   bool _isLoading = false;
   final ImagePicker _picker = ImagePicker();
 
+  // Blue theme colors
+  static const Color primaryBlue = Color(0xFF1E88E5);
+  static const Color lightBlue = Color(0xFF42A5F5);
+  static const Color darkBlue = Color(0xFF1565C0);
+  static const Color accentBlue = Color(0xFF0D47A1);
+  static const Color backgroundBlue = Color(0xFFF3F8FF);
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -39,7 +46,6 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
 
   Future<void> _pickImage() async {
     try {
-      // Tampilkan dialog pilihan sumber gambar
       final ImageSource? source = await _showImageSourceDialog();
       if (source == null) return;
 
@@ -63,29 +69,79 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
   Future<ImageSource?> _showImageSourceDialog() async {
     return showModalBottomSheet<ImageSource>(
       context: context,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Kamera'),
-                onTap: () {
-                  Navigator.of(context).pop(ImageSource.camera);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Galeri'),
-                onTap: () {
-                  Navigator.of(context).pop(ImageSource.gallery);
-                },
-              ),
-            ],
+        return Container(
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            color: Colors.white,
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(top: 12, bottom: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Text(
+                  'Pilih Sumber Gambar',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: darkBlue,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: primaryBlue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.camera_alt, color: primaryBlue),
+                  ),
+                  title: const Text(
+                    'Kamera',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: const Text('Ambil foto langsung'),
+                  onTap: () => Navigator.of(context).pop(ImageSource.camera),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: primaryBlue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.photo_library, color: primaryBlue),
+                  ),
+                  title: const Text(
+                    'Galeri',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: const Text('Pilih dari galeri'),
+                  onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         );
       },
@@ -98,6 +154,19 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
       initialDate: DateTime.now().add(const Duration(days: 1)),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: primaryBlue,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (!mounted) return;
@@ -106,6 +175,19 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
       final TimeOfDay? pickedTime = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.now(),
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: Theme.of(context).colorScheme.copyWith(
+                primary: primaryBlue,
+                onPrimary: Colors.white,
+                surface: Colors.white,
+                onSurface: Colors.black,
+              ),
+            ),
+            child: child!,
+          );
+        },
       );
 
       if (!mounted) return;
@@ -152,7 +234,7 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
 
       if (success) {
         _showSuccessSnackBar('Lelang berhasil ditambahkan');
-        Navigator.pop(context, true); // Aman karena sudah cek mounted
+        Navigator.pop(context, true);
       } else {
         throw Exception('Gagal menambahkan item lelang');
       }
@@ -172,9 +254,17 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: Colors.red[600],
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
       ),
     );
   }
@@ -182,9 +272,17 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
   void _showSuccessSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle_outline, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: primaryBlue,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
       ),
     );
   }
@@ -258,192 +356,322 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
     }
   }
 
+  Widget _buildFormField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required String? Function(String?) validator,
+    String? hint,
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+    int? maxLines,
+    TextCapitalization? textCapitalization,
+    bool readOnly = false,
+    VoidCallback? onTap,
+    Widget? suffixIcon,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          prefixIcon: Container(
+            margin: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: primaryBlue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: primaryBlue, size: 20),
+          ),
+          suffixIcon: suffixIcon,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: primaryBlue, width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Colors.red, width: 2),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Colors.red, width: 2),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
+          labelStyle: const TextStyle(color: Colors.grey),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
+        ),
+        validator: validator,
+        keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
+        maxLines: maxLines ?? 1,
+        textCapitalization: textCapitalization ?? TextCapitalization.none,
+        readOnly: readOnly,
+        onTap: onTap,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: backgroundBlue,
       appBar: const CustomAppBar(title: 'Buat Lelang', showBackButton: true),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(20.0),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Card(
-                  elevation: 2,
+                // Header Section
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [primaryBlue, lightBlue],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryBlue.withOpacity(0.3),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(Icons.gavel, size: 48, color: Colors.white),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Buat Lelang Baru',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Isi informasi produk yang akan dilelang',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                // Information Form Card
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(24.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Informasi Lelang',
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.bold),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: primaryBlue.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                Icons.info_outline,
+                                color: primaryBlue,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Text(
+                              'Informasi Lelang',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: darkBlue,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
+                        const SizedBox(height: 24),
+
+                        _buildFormField(
                           controller: _titleController,
-                          decoration: const InputDecoration(
-                            labelText: 'Judul Lelang',
-                            prefixIcon: Icon(Icons.title),
-                            border: OutlineInputBorder(),
-                            hintText: 'Masukkan judul lelang',
-                          ),
+                          label: 'Judul Lelang',
+                          icon: Icons.title,
+                          hint: 'Masukkan judul lelang',
                           validator: _validateTitle,
                           textCapitalization: TextCapitalization.words,
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
+
+                        _buildFormField(
                           controller: _descController,
-                          decoration: const InputDecoration(
-                            labelText: 'Deskripsi',
-                            prefixIcon: Icon(Icons.description),
-                            border: OutlineInputBorder(),
-                            hintText: 'Deskripsikan item yang akan dilelang',
-                          ),
+                          label: 'Deskripsi',
+                          icon: Icons.description,
+                          hint: 'Deskripsikan item yang akan dilelang',
                           validator: _validateDescription,
                           maxLines: 3,
                           textCapitalization: TextCapitalization.sentences,
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
+
+                        _buildFormField(
                           controller: _priceController,
-                          decoration: const InputDecoration(
-                            labelText: 'Harga Awal (Rp)',
-                            prefixIcon: Icon(Icons.monetization_on),
-                            border: OutlineInputBorder(),
-                            hintText: 'Contoh: 100000',
-                          ),
-                          keyboardType: TextInputType.number,
+                          label: 'Harga Awal (Rp)',
+                          icon: Icons.monetization_on,
+                          hint: 'Contoh: 100000',
                           validator: _validatePrice,
+                          keyboardType: TextInputType.number,
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        InkWell(
-                          onTap: () async {
-                            final result =
-                                await Navigator.pushNamed(
-                                      context,
-                                      AppRoutes.locationPicker,
-                                    )
-                                    as Map<String, dynamic>?;
 
-                            if (result != null) {
-                              final locationService = LocationService();
-                              try {
-                                final locationId = await locationService
-                                    .saveLocation(
-                                      name: "Lokasi Lelang",
-                                      latitude: result['latitude'],
-                                      longitude: result['longitude'],
-                                      detailAddress: result['address'],
-                                    );
+                        // Location Picker
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 20),
+                          child: InkWell(
+                            onTap: () async {
+                              final result =
+                                  await Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.locationPicker,
+                                      )
+                                      as Map<String, dynamic>?;
 
-                                if (locationId != null) {
-                                  setState(() {
-                                    _locationIdController.text =
-                                        locationId.toString();
-                                    _selectedLocationAddress =
-                                        result['address'];
-                                  });
+                              if (result != null) {
+                                final locationService = LocationService();
+                                try {
+                                  final locationId = await locationService
+                                      .saveLocation(
+                                        name: "Lokasi Lelang",
+                                        latitude: result['latitude'],
+                                        longitude: result['longitude'],
+                                        detailAddress: result['address'],
+                                      );
+
+                                  if (locationId != null) {
+                                    setState(() {
+                                      _locationIdController.text =
+                                          locationId.toString();
+                                      _selectedLocationAddress =
+                                          result['address'];
+                                    });
+                                  }
+                                } catch (e) {
+                                  _showErrorSnackBar(
+                                    'Gagal menyimpan lokasi: $e',
+                                  );
                                 }
-                              } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Gagal menyimpan lokasi: $e'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
                               }
-                            }
-                          },
-                          child: InputDecorator(
-                            decoration: InputDecoration(
-                              labelText: 'Lokasi',
-                              prefixIcon: const Icon(Icons.location_on),
-                              border: const OutlineInputBorder(),
-                              errorText: _validateLocationId(
-                                _locationIdController.text,
+                            },
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color:
+                                      _validateLocationId(
+                                                _locationIdController.text,
+                                              ) !=
+                                              null
+                                          ? Colors.red
+                                          : Colors.grey[300]!,
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                color: Colors.grey[50],
                               ),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    _selectedLocationAddress ??
-                                        'Pilih lokasi di peta',
-                                    style: TextStyle(
-                                      color:
-                                          _selectedLocationAddress == null
-                                              ? Colors.grey
-                                              : null,
+                              child: Row(
+                                children: [
+                                  Container(
+                                    margin: const EdgeInsets.only(right: 16),
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: primaryBlue.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Icon(
+                                      Icons.location_on,
+                                      color: primaryBlue,
+                                      size: 20,
                                     ),
                                   ),
-                                ),
-                                const Icon(Icons.map),
-                              ],
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Lokasi',
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          _selectedLocationAddress ??
+                                              'Pilih lokasi di peta',
+                                          style: TextStyle(
+                                            color:
+                                                _selectedLocationAddress == null
+                                                    ? Colors.grey
+                                                    : Colors.black87,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(Icons.map, color: primaryBlue),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
+
+                        _buildFormField(
                           controller: _deadlineController,
-                          decoration: const InputDecoration(
-                            labelText: 'Deadline',
-                            prefixIcon: Icon(Icons.schedule),
-                            border: OutlineInputBorder(),
-                            hintText: 'Pilih tanggal dan waktu deadline',
-                            suffixIcon: Icon(Icons.calendar_today),
-                          ),
+                          label: 'Deadline',
+                          icon: Icons.schedule,
+                          hint: 'Pilih tanggal dan waktu deadline',
                           validator: _validateDeadline,
                           readOnly: true,
                           onTap: _selectDeadline,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Card(
-                  elevation: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Gambar Produk',
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 16),
-                        if (_image != null) ...[
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.file(
-                              _image!,
-                              height: 200,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton.icon(
-                            onPressed: _pickImage,
-                            icon: const Icon(Icons.image),
-                            label: Text(
-                              _image == null ? 'Pilih Gambar' : 'Ganti Gambar',
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                            ),
+                          suffixIcon: Icon(
+                            Icons.calendar_today,
+                            color: primaryBlue,
                           ),
                         ),
                       ],
@@ -451,39 +679,167 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                SizedBox(
-                  height: 48,
+
+                // Image Upload Card
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: primaryBlue.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                Icons.photo_camera,
+                                color: primaryBlue,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Text(
+                              'Gambar Produk',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: darkBlue,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+
+                        if (_image != null) ...[
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Image.file(
+                                _image!,
+                                height: 200,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: OutlinedButton.icon(
+                            onPressed: _pickImage,
+                            icon: Icon(
+                              _image == null
+                                  ? Icons.add_photo_alternate
+                                  : Icons.edit,
+                              color: primaryBlue,
+                            ),
+                            label: Text(
+                              _image == null ? 'Pilih Gambar' : 'Ganti Gambar',
+                              style: TextStyle(
+                                color: primaryBlue,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: primaryBlue, width: 2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              backgroundColor: primaryBlue.withOpacity(0.05),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                // Submit Button
+                Container(
+                  height: 56,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [primaryBlue, lightBlue],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryBlue.withOpacity(0.4),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _submitForm,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
                     child:
                         _isLoading
                             ? const SizedBox(
-                              height: 20,
-                              width: 20,
+                              height: 24,
+                              width: 24,
                               child: CircularProgressIndicator(
-                                strokeWidth: 2,
+                                strokeWidth: 2.5,
                                 valueColor: AlwaysStoppedAnimation<Color>(
                                   Colors.white,
                                 ),
                               ),
                             )
-                            : const Text(
-                              'Buat Lelang',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.gavel, color: Colors.white),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Buat Lelang',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
               ],
             ),
           ),

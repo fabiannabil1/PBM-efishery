@@ -277,19 +277,6 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
 
                         ElevatedButton(
                           onPressed: () {
-                            if (item.userId == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'User ID tidak tersedia untuk chat',
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-                            print(
-                              'Navigating to chat with userId: ${item.userId}',
-                            );
                             Navigator.pushNamed(
                               context,
                               '/chat',
@@ -340,6 +327,7 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                       ),
                     ),
                   ],
+                  const SizedBox(height: 64),
                 ],
               ),
             ),

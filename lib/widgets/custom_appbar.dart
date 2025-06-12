@@ -20,6 +20,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? flexibleSpace;
   final bool enableShadow;
   final IconThemeData? iconTheme;
+  final bool showCheckButton;
+  final VoidCallback? onCheckPressed;
 
   const CustomAppBar({
     super.key,
@@ -37,6 +39,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.flexibleSpace,
     this.enableShadow = true,
     this.iconTheme,
+    this.showCheckButton = false,
+    this.onCheckPressed,
   });
 
   @override
@@ -85,7 +89,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: Text(title),
         ),
         centerTitle: centerTitle,
-        actions: _buildActions(),
+        actions: _buildActions(context),
         elevation: elevation ?? 0,
         toolbarHeight: toolbarHeight ?? kToolbarHeight,
         iconTheme: defaultIconTheme,
@@ -125,21 +129,39 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return null;
   }
 
-  List<Widget>? _buildActions() {
-    if (actions == null) return null;
+  List<Widget>? _buildActions(BuildContext context) {
+    final List<Widget> actionWidgets = [];
 
-    return actions!.map((action) {
-      if (action is IconButton) {
-        return IconButton(
-          onPressed: action.onPressed,
-          icon: action.icon,
-          tooltip: action.tooltip,
+    if (showCheckButton) {
+      actionWidgets.add(
+        IconButton(
+          icon: const Icon(Icons.check),
+          onPressed: onCheckPressed,
+          tooltip: 'Confirm',
           splashColor: Colors.white.withOpacity(0.2),
           highlightColor: Colors.white.withOpacity(0.1),
-        );
-      }
-      return action;
-    }).toList();
+        ),
+      );
+    }
+
+    if (actions != null) {
+      actionWidgets.addAll(
+        actions!.map((action) {
+          if (action is IconButton) {
+            return IconButton(
+              onPressed: action.onPressed,
+              icon: action.icon,
+              tooltip: action.tooltip,
+              splashColor: Colors.white.withOpacity(0.2),
+              highlightColor: Colors.white.withOpacity(0.1),
+            );
+          }
+          return action;
+        }).toList(),
+      );
+    }
+
+    return actionWidgets.isNotEmpty ? actionWidgets : null;
   }
 
   @override
@@ -156,6 +178,8 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Color? backgroundColor;
   final double blur;
   final double opacity;
+  final bool showCheckButton;
+  final VoidCallback? onCheckPressed;
 
   const GlassAppBar({
     super.key,
@@ -167,10 +191,29 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.backgroundColor,
     this.blur = 10.0,
     this.opacity = 0.1,
+    this.showCheckButton = false,
+    this.onCheckPressed,
   });
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> actionWidgets = [];
+
+    if (showCheckButton) {
+      actionWidgets.add(
+        IconButton(
+          icon: const Icon(Icons.check),
+          onPressed: onCheckPressed,
+          tooltip: 'Confirm',
+          color: Colors.white,
+        ),
+      );
+    }
+
+    if (actions != null) {
+      actionWidgets.addAll(actions!);
+    }
+
     return Container(
       decoration: BoxDecoration(
         boxShadow: [
@@ -205,11 +248,10 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             centerTitle: centerTitle,
-            actions: actions,
+            actions: actionWidgets.isNotEmpty ? actionWidgets : null,
             backgroundColor: (backgroundColor ?? Colors.white).withAlpha(
               (opacity * 255).toInt(),
             ),
-            // backgroundColor: (backgroundColor ?? Colors.white).withOpacity(opacity),
             systemOverlayStyle: SystemUiOverlayStyle.light,
           ),
         ),

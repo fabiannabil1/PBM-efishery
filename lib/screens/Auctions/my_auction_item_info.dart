@@ -17,22 +17,15 @@ class MyAuctionInfoScreen extends StatefulWidget {
 
 class _MyAuctionInfoScreenState extends State<MyAuctionInfoScreen> {
   AuctionProvider? _auctionProvider;
+  bool _isLoading = false;
 
-  // Color palette
-  static const List<Color> blueColors = [
-    Color(0xFF1E3A8A), // blue-800
-    Color(0xFF2563EB), // blue-600
-    Color(0xFF3B82F6), // blue-500
-    Color(0xFF60A5FA), // blue-400
-  ];
+  // Color constants
+  static const _AppColors _colors = _AppColors();
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
-      _auctionProvider?.startAutoRefresh();
-    });
+    _initializeProvider();
   }
 
   @override
@@ -41,70 +34,235 @@ class _MyAuctionInfoScreenState extends State<MyAuctionInfoScreen> {
     super.dispose();
   }
 
-  void _closeAuction() {}
+  // Initialize provider
+  void _initializeProvider() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
+      _auctionProvider?.startAutoRefresh();
+    });
+  }
 
-  void _deleteAuction() async {
-    final confirm = await showDialog<bool>(
+  // Navigation methods
+  void _navigateToBidList() {
+    Navigator.pushNamed(context, '/bid-list', arguments: widget.item.id);
+  }
+
+  void _navigateToUpdate() {
+    Navigator.pushNamed(context, '/my-auction/update', arguments: widget.item);
+  }
+
+  // Auction actions
+  Future<void> _closeAuction() async {
+    final shouldClose = await _showConfirmationDialog(
+      title: 'Tutup Lelang',
+      message:
+          'Yakin ingin menutup lelang ini? Tindakan ini tidak dapat dibatalkan.',
+      confirmText: 'Tutup',
+      cancelText: 'Batal',
+    );
+
+    if (shouldClose == true) {
+      // TODO: Implement close auction logic
+      _showSnackBar('Fitur tutup lelang akan segera tersedia');
+    }
+  }
+
+  Future<void> _deleteAuction() async {
+    final shouldDelete = await _showConfirmationDialog(
+      title: 'Hapus Lelang',
+      message:
+          'Yakin ingin menghapus lelang ini? Tindakan ini tidak dapat dibatalkan.',
+      confirmText: 'Hapus',
+      cancelText: 'Batal',
+      isDestructive: true,
+    );
+
+    if (shouldDelete == true) {
+      await _performDeleteAuction();
+    }
+  }
+
+  Future<void> _performDeleteAuction() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final success = await _auctionProvider?.deleteAuction(widget.item.id);
+
+      if (success == true && mounted) {
+        _showSnackBar('Lelang berhasil dihapus');
+        Navigator.pop(context);
+      } else {
+        _showSnackBar('Gagal menghapus lelang');
+      }
+    } catch (e) {
+      debugPrint('Error deleting auction: $e');
+      if (mounted) {
+        _showSnackBar('Terjadi kesalahan saat menghapus lelang');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  // Helper methods
+  Future<bool?> _showConfirmationDialog({
+    required String title,
+    required String message,
+    required String confirmText,
+    required String cancelText,
+    bool isDestructive = false,
+  }) {
+    return showDialog<bool>(
       context: context,
       builder:
-          (ctx) => AlertDialog(
+          (context) => AlertDialog(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            title: const Text(
-              'Konfirmasi',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            title: Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             ),
-            content: const Text(
-              'Yakin ingin menghapus lelang ini?',
-              style: TextStyle(fontSize: 16),
-            ),
+            content: Text(message, style: const TextStyle(fontSize: 16)),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
+                onPressed: () => Navigator.pop(context, false),
                 style: TextButton.styleFrom(foregroundColor: Colors.grey[600]),
-                child: const Text('Batal'),
+                child: Text(cancelText),
               ),
               ElevatedButton(
-                onPressed: () => Navigator.pop(ctx, true),
+                onPressed: () => Navigator.pop(context, true),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
+                  backgroundColor: isDestructive ? Colors.red : _colors.primary,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: const Text('Hapus'),
+                child: Text(confirmText),
               ),
             ],
           ),
     );
-    if (confirm == true) {
-      try {
-        final success = await _auctionProvider?.deleteAuction(widget.item.id);
-        if (success == true && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Lelang berhasil dihapus')),
-          );
-          Navigator.pop(context);
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Gagal menghapus lelang')),
-          );
-        }
-      }
+  }
+
+  void _showSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      );
     }
-    if (confirm == true) {
-      // final success = await _auctionProvider?.deleteAuction(widget.item.id);
-      // if (success == true && mounted) {
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     const SnackBar(content: Text('Lelang berhasil dihapus')),
-      //   );
-      //   Navigator.pop(context);
-      // }
-    }
+  }
+
+  // Widget builders
+  Widget _buildHeroImage() {
+    return Hero(
+      tag: 'auction_image_${widget.item.id}',
+      child: Container(
+        width: double.infinity,
+        height: 280,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Image.network(
+            widget.item.imageUrl,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Container(
+                color: Colors.grey[200],
+                child: const Center(child: CircularProgressIndicator()),
+              );
+            },
+            errorBuilder:
+                (context, error, stackTrace) => Container(
+                  color: Colors.grey[200],
+                  child: const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.broken_image, size: 64, color: Colors.grey),
+                        SizedBox(height: 8),
+                        Text('Gambar tidak dapat dimuat'),
+                      ],
+                    ),
+                  ),
+                ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            _colors.lightBlue.withOpacity(0.1),
+            _colors.primary.withOpacity(0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _colors.lightBlue.withOpacity(0.2), width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: _colors.primary,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.gavel, color: Colors.white, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.item.title,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: _colors.darkBlue,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Kelola lelang Anda dengan mudah',
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildActionButton({
@@ -116,78 +274,62 @@ class _MyAuctionInfoScreenState extends State<MyAuctionInfoScreen> {
     bool isDestructive = false,
   }) {
     return Container(
-      height: 60,
       margin: const EdgeInsets.only(bottom: 16),
-      child: ElevatedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 22),
-        label: Text(
-          text,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor,
-          foregroundColor: foregroundColor ?? Colors.white,
-          elevation: isDestructive ? 2 : 4,
-          shadowColor: backgroundColor.withOpacity(0.3),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+      child: SizedBox(
+        height: 56,
+        child: ElevatedButton.icon(
+          onPressed: _isLoading ? null : onPressed,
+          icon: Icon(icon, size: 20),
+          label: Text(
+            text,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: backgroundColor,
+            foregroundColor: foregroundColor ?? Colors.white,
+            disabledBackgroundColor: Colors.grey[300],
+            elevation: isDestructive ? 2 : 4,
+            shadowColor: backgroundColor.withOpacity(0.3),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildInfoCard() {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 32),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            blueColors[3].withOpacity(0.1),
-            blueColors[2].withOpacity(0.05),
-          ],
+  Widget _buildActionButtons() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildActionButton(
+          text: 'Lihat Penawaran',
+          icon: Icons.visibility,
+          onPressed: _navigateToBidList,
+          backgroundColor: _colors.primary,
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: blueColors[3].withOpacity(0.2), width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: blueColors[2],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(Icons.gavel, color: Colors.white, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  widget.item.title,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: blueColors[0],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Kelola lelang Anda dengan mudah',
-            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-          ),
-        ],
-      ),
+        _buildActionButton(
+          text: 'Perbarui Data',
+          icon: Icons.edit,
+          onPressed: _navigateToUpdate,
+          backgroundColor: _colors.secondary,
+        ),
+        _buildActionButton(
+          text: 'Tutup Lelang',
+          icon: Icons.lock,
+          onPressed: _closeAuction,
+          backgroundColor: _colors.lightBlue,
+        ),
+        _buildActionButton(
+          text: 'Hapus Lelang',
+          icon: Icons.delete,
+          onPressed: _deleteAuction,
+          backgroundColor: Colors.red[400]!,
+          isDestructive: true,
+        ),
+      ],
     );
   }
 
@@ -195,96 +337,47 @@ class _MyAuctionInfoScreenState extends State<MyAuctionInfoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: CustomAppBar(title: 'Informasi Lelang', showBackButton: true),
+      appBar: const CustomAppBar(
+        title: 'Informasi Lelang',
+        showBackButton: true,
+      ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Hero(
-                tag: 'auction_image_${widget.item.title}',
-                child: Container(
-                  width: double.infinity,
-                  height: 300,
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildHeroImage(),
+                  const SizedBox(height: 24),
+                  _buildInfoCard(),
+                  const SizedBox(height: 24),
+                  Expanded(
+                    child: SingleChildScrollView(child: _buildActionButtons()),
                   ),
-                  child: Image.network(
-                    widget.item.imageUrl,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    errorBuilder:
-                        (_, __, ___) => const Center(
-                          child: Icon(Icons.broken_image, size: 80),
-                        ),
-                  ),
-                ),
+                ],
               ),
-              const SizedBox(height: 16),
-              _buildInfoCard(),
-
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildActionButton(
-                        text: 'Lihat Penawaran',
-                        icon: Icons.visibility,
-                        onPressed: () {
-                          Navigator.pushNamed(
-                            context,
-                            '/bid-list',
-                            arguments: widget.item.id,
-                          );
-                        },
-                        backgroundColor: blueColors[2],
-                      ),
-
-                      _buildActionButton(
-                        text: 'Perbarui Data',
-                        icon: Icons.edit,
-                        onPressed: () {
-                          Navigator.pushNamed(
-                            context,
-                            '/my-auction/update',
-                            arguments: widget.item,
-                          );
-                        },
-                        backgroundColor: blueColors[1],
-                      ),
-
-                      _buildActionButton(
-                        text: 'Tutup Lelang',
-                        icon: Icons.lock,
-                        onPressed: _closeAuction,
-                        backgroundColor: blueColors[3],
-                      ),
-
-                      _buildActionButton(
-                        text: 'Hapus Lelang',
-                        icon: Icons.delete,
-                        onPressed: _deleteAuction,
-                        backgroundColor: Colors.red[400]!,
-                        isDestructive: true,
-                      ),
-
-                      const SizedBox(height: 20),
-                    ],
-                  ),
-                ),
+            ),
+            // Loading overlay
+            if (_isLoading)
+              Container(
+                color: Colors.black.withOpacity(0.3),
+                child: const Center(child: CircularProgressIndicator()),
               ),
-            ],
-          ),
+          ],
         ),
       ),
     );
   }
+}
+
+// Color constants class
+class _AppColors {
+  const _AppColors();
+
+  Color get darkBlue => const Color(0xFF1E3A8A);
+  Color get secondary => const Color(0xFF2563EB);
+  Color get primary => const Color(0xFF3B82F6);
+  Color get lightBlue => const Color(0xFF60A5FA);
 }
