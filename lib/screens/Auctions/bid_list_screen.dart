@@ -1,8 +1,10 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/bid_item.dart';
 import '../../providers/auction_provider.dart';
-import '../../widgets/custom-appbar.dart';
+import '../../widgets/custom_appbar.dart';
 import 'package:intl/intl.dart';
 
 class BidListScreen extends StatefulWidget {

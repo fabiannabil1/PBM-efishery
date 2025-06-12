@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -156,7 +158,7 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double opacity;
 
   const GlassAppBar({
-    Key? key,
+    super.key,
     required this.title,
     this.actions,
     this.centerTitle = true,
@@ -165,7 +167,7 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.backgroundColor,
     this.blur = 10.0,
     this.opacity = 0.1,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

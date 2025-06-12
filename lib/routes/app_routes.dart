@@ -17,5 +17,9 @@ class AppRoutes {
   static const myAuctionUpdate = '/my-auction/update';
   static const myAuctionInfo = '/my-auction/info';
   static const bidList = '/bid-list';
+
+  static const chat = '/chat';
   // tambahkan route lain sesuai kebutuhan
+
+  static const locationPicker = '/location-picker';
 }

@@ -1,8 +1,10 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../models/auction_item.dart';
-import '../../widgets/custom-appbar.dart';
+import '../../widgets/custom_appbar.dart';
 import '../../services/auction_service.dart';
 import '../../providers/auction_provider.dart';
 
@@ -17,13 +19,6 @@ class AuctionDetailScreen extends StatefulWidget {
 
 class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
   AuctionProvider? _auctionProvider;
-
-  static const List<Color> blueColors = [
-    Color(0xFF1E3A8A), // blue-800
-    Color(0xFF2563EB), // blue-600
-    Color(0xFF3B82F6), // blue-500
-    Color(0xFF60A5FA), // blue-400
-  ];
 
   @override
   void initState() {
@@ -278,14 +273,27 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 8),
+
                         ElevatedButton(
                           onPressed: () {
-                            // TODO: Implement favorite functionality
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Ditambahkan ke favorit'),
-                              ),
+                            if (item.userId == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'User ID tidak tersedia untuk chat',
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
+                            print(
+                              'Navigating to chat with userId: ${item.userId}',
+                            );
+                            Navigator.pushNamed(
+                              context,
+                              '/chat',
+                              arguments: item.userId,
                             );
                           },
                           style: ElevatedButton.styleFrom(
@@ -296,7 +304,10 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Icon(Icons.favorite_border),
+                          child: const Icon(
+                            Icons.chat_bubble_outline,
+                            size: 24,
+                          ),
                         ),
                       ],
                     ),

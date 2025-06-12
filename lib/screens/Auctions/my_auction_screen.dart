@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auction_provider.dart';
 import '../../widgets/auction/auction_card.dart';
-import '../../widgets/custom-appbar.dart';
+import '../../widgets/custom_appbar.dart';
 import '../../widgets/auction/auction_search_bar.dart';
 
 class MyAuction extends StatefulWidget {

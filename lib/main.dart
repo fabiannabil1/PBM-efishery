@@ -1,3 +1,4 @@
+import 'package:efishery/services/mqtt_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -5,11 +6,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'providers/auth_provider.dart';
 import 'providers/auction_provider.dart';
+import 'providers/user_provider.dart';
 
 import 'routes/app_routes.dart';
 import 'routes/route_generator.dart';
 import 'utils/constants.dart';
 import 'utils/token_storage.dart';
+import 'services/sqlite_service.dart';
 
 void main() async {
   // Ensure Flutter binding is initialized
@@ -34,12 +37,21 @@ void main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => AuctionProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => UserProvider(),
           // Add other providers here as needed
         ),
       ],
       child: MyApp(initialToken: token),
     ),
   );
+}
+
+void itilizeMQTT() async {
+  final username = "duricare";
+  final mqttService = MqttService(username: username, db: SQLiteService());
+  await mqttService.connect();
 }
 
 class MyApp extends StatelessWidget {

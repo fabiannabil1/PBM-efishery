@@ -1,9 +1,11 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:efishery/models/auction_item.dart';
 import '../../providers/auction_provider.dart';
-import 'package:efishery/widgets/custom-appbar.dart';
+import 'package:efishery/widgets/custom_appbar.dart';
 import 'package:efishery/widgets/continue_button.dart';
 
 class MyAuctionUpdateScreen extends StatefulWidget {

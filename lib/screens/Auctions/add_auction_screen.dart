@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../services/auction_service.dart';
-import '../../widgets/custom-appbar.dart';
+import '../../services/location_service.dart';
+import '../../routes/app_routes.dart';
+import '../../widgets/custom_appbar.dart';
 
 class AddAuctionScreen extends StatefulWidget {
   const AddAuctionScreen({super.key});
@@ -18,6 +20,7 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
   final _descController = TextEditingController();
   final _priceController = TextEditingController();
   final _locationIdController = TextEditingController();
+  String? _selectedLocationAddress;
   final _deadlineController = TextEditingController();
 
   File? _image;
@@ -97,11 +100,15 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
 
+    if (!mounted) return;
+
     if (pickedDate != null) {
       final TimeOfDay? pickedTime = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.now(),
       );
+
+      if (!mounted) return;
 
       if (pickedTime != null) {
         final DateTime finalDateTime = DateTime(
@@ -141,14 +148,18 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
         image: _image!,
       );
 
+      if (!mounted) return;
+
       if (success) {
         _showSuccessSnackBar('Lelang berhasil ditambahkan');
-        Navigator.pop(context, true); // Return true untuk indikasi success
+        Navigator.pop(context, true); // Aman karena sudah cek mounted
       } else {
         throw Exception('Gagal menambahkan item lelang');
       }
     } catch (e) {
-      _showErrorSnackBar('Error: ${e.toString()}');
+      if (mounted) {
+        _showErrorSnackBar('Error: ${e.toString()}');
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -312,19 +323,71 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _locationIdController,
-                          decoration: const InputDecoration(
-                            labelText: 'ID Lokasi',
-                            prefixIcon: Icon(Icons.location_on),
-                            border: OutlineInputBorder(),
-                            hintText: 'Masukkan ID lokasi',
+                        InkWell(
+                          onTap: () async {
+                            final result =
+                                await Navigator.pushNamed(
+                                      context,
+                                      AppRoutes.locationPicker,
+                                    )
+                                    as Map<String, dynamic>?;
+
+                            if (result != null) {
+                              final locationService = LocationService();
+                              try {
+                                final locationId = await locationService
+                                    .saveLocation(
+                                      name: "Lokasi Lelang",
+                                      latitude: result['latitude'],
+                                      longitude: result['longitude'],
+                                      detailAddress: result['address'],
+                                    );
+
+                                if (locationId != null) {
+                                  setState(() {
+                                    _locationIdController.text =
+                                        locationId.toString();
+                                    _selectedLocationAddress =
+                                        result['address'];
+                                  });
+                                }
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Gagal menyimpan lokasi: $e'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          child: InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: 'Lokasi',
+                              prefixIcon: const Icon(Icons.location_on),
+                              border: const OutlineInputBorder(),
+                              errorText: _validateLocationId(
+                                _locationIdController.text,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    _selectedLocationAddress ??
+                                        'Pilih lokasi di peta',
+                                    style: TextStyle(
+                                      color:
+                                          _selectedLocationAddress == null
+                                              ? Colors.grey
+                                              : null,
+                                    ),
+                                  ),
+                                ),
+                                const Icon(Icons.map),
+                              ],
+                            ),
                           ),
-                          keyboardType: TextInputType.number,
-                          validator: _validateLocationId,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
