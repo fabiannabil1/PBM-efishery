@@ -1,4 +1,3 @@
-import 'package:efishery/services/mqtt_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +12,6 @@ import 'routes/app_routes.dart';
 import 'routes/route_generator.dart';
 import 'utils/constants.dart';
 import 'utils/token_storage.dart';
-import 'services/sqlite_service.dart';
 
 void main() async {
   // Ensure Flutter binding is initialized
@@ -49,12 +47,6 @@ void main() async {
       child: MyApp(initialToken: token),
     ),
   );
-}
-
-void itilizeMQTT() async {
-  final username = "duricare";
-  final mqttService = MqttService(username: username, db: SQLiteService());
-  await mqttService.connect();
 }
 
 class MyApp extends StatelessWidget {

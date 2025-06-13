@@ -6,8 +6,118 @@ import '../../providers/profile_provider.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/navbar.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  ProfileProvider? _provider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Save reference to provider
+    if (_provider == null) {
+      _provider = Provider.of<ProfileProvider>(context, listen: false);
+      _provider!.addListener(_handleProviderChanges);
+    }
+  }
+
+  void _handleProviderChanges() {
+    if (!mounted || _provider == null) return;
+
+    if (_provider!.errorMessage != null) {
+      _showErrorDialog(_provider!.errorMessage!);
+      // Clear error after showing dialog
+      _provider!.clearError();
+    }
+  }
+
+  void _showErrorDialog(String errorMessage) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          icon: const Icon(Icons.error_outline, color: Colors.red, size: 48),
+          title: const Text(
+            'Silahkan Login Ulang',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            // errorMessage,
+            'Gagal Memuat Profil',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+                _handleLogout();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+              ),
+              child: const Text(
+                'Login Ulang',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+            ),
+            // ElevatedButton(
+            //   onPressed: () {
+            //     Navigator.of(context).pop(); // Close dialog
+            //     _handleRetryLogin();
+            //   },
+            //   style: ElevatedButton.styleFrom(
+            //     backgroundColor: Colors.blue,
+            //     foregroundColor: Colors.white,
+            //     padding: const EdgeInsets.symmetric(
+            //       horizontal: 20,
+            //       vertical: 12,
+            //     ),
+            //     shape: RoundedRectangleBorder(
+            //       borderRadius: BorderRadius.circular(8),
+            //     ),
+            //   ),
+            //   child: const Text(
+            //     'Login Ulang',
+            //     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            //   ),
+            // ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _handleLogout() {
+    // Navigate to logout route
+    Navigator.pushReplacementNamed(context, '/logout');
+  }
+
+  // void _handleRetryLogin() {
+  //   // Navigate to login screen
+  //   Navigator.pushReplacementNamed(context, '/login');
+  // }
+
+  @override
+  void dispose() {
+    // Safely remove listener using saved reference
+    _provider?.removeListener(_handleProviderChanges);
+    _provider = null;
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,18 +129,22 @@ class ProfileScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (provider.errorMessage != null) {
-            return Center(
-              child: Text(
-                provider.errorMessage!,
-                style: const TextStyle(color: Colors.red),
-              ),
-            );
-          }
-
+          // Don't show error in UI anymore, it's handled by dialog
           final profile = provider.profile;
           if (profile == null) {
-            return const Center(child: Text("Profil tidak ditemukan."));
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.person_off, size: 64, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text(
+                    "Profil tidak ditemukan.",
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                ],
+              ),
+            );
           }
 
           return Stack(
@@ -126,6 +240,24 @@ class ProfileScreen extends StatelessWidget {
                                 color: Colors.white,
                               ),
                             ),
+                            const SizedBox(height: 0),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 6,
+                              ),
+                              // decoration: BoxDecoration(
+                              //   color: Colors.white.withOpacity(0.2),
+                              //   borderRadius: BorderRadius.circular(20),
+                              // ),
+                              child: Text(
+                                profile.bio ?? 'Bio',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
                             const SizedBox(height: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -173,16 +305,13 @@ class ProfileScreen extends StatelessWidget {
                               _buildInfoCard(
                                 icon: Icons.location_on,
                                 title: 'Address',
-                                value: profile.address ?? '-',
+                                value: profile.address ?? '',
                                 iconColor: Colors.blue,
                               ),
                               const SizedBox(height: 32),
                               ElevatedButton.icon(
                                 onPressed: () {
-                                  Navigator.pushReplacementNamed(
-                                    context,
-                                    '/logout',
-                                  );
+                                  _showLogoutConfirmation();
                                 },
                                 icon: const Icon(Icons.logout),
                                 label: const Text('Logout'),
@@ -227,6 +356,55 @@ class ProfileScreen extends StatelessWidget {
           }
         },
       ),
+    );
+  }
+
+  void _showLogoutConfirmation() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Konfirmasi Logout',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          content: const Text(
+            'Apakah Anda yakin ingin keluar dari aplikasi?',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Batal',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacementNamed(context, '/logout');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                'Logout',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

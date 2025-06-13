@@ -152,6 +152,31 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  Future<void> _confirmSave() async {
+    final shouldSave = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Konfirmasi'),
+            content: const Text('Apakah kamu yakin ingin menyimpan perubahan?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Batal'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Simpan'),
+              ),
+            ],
+          ),
+    );
+
+    if (shouldSave == true) {
+      _saveProfile();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ProfileProvider>(context);
@@ -212,7 +237,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       const SizedBox(height: 24),
                       ContinueButton(
                         isEnabled: true,
-                        onPressed: _saveProfile,
+                        onPressed: _confirmSave,
                         label: 'Simpan Perubahan',
                       ),
                     ],

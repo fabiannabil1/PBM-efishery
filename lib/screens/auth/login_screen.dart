@@ -1,4 +1,6 @@
 import 'package:efishery/providers/auth_provider.dart';
+import 'package:efishery/providers/profile_provider.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/continue_button.dart';
@@ -37,8 +39,15 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
-      // Navigator.pushReplacementNamed(context, '/home');
-      Navigator.pushReplacementNamed(context, '/auctions/menu');
+      // Load user profile after successful login
+      final profileProvider = Provider.of<ProfileProvider>(
+        context,
+        listen: false,
+      );
+      await profileProvider.fetchProfile(); // Use the provider to load profile
+      Navigator.pushReplacementNamed(context, '/home');
+
+      // Navigator.pushReplacementNamed(context, '/auctions/menu');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(authProvider.errorMessage ?? 'Login gagal')),

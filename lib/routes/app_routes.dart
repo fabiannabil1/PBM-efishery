@@ -3,7 +3,7 @@ class AppRoutes {
   static const logout = '/logout';
   static const home = '/home';
   static const register = '/register';
-  static const landing = '/landing';
+  static const landing = '/';
   static const profile = '/profile';
   static const dashboardusers = '/dashboard_users';
   static const cartpage = '/cart_page';

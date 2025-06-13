@@ -19,7 +19,8 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await _userService.getFullProfile(); // ganti dari getCurrentUser()
+      final result =
+          await _userService.getFullProfile(); // ganti dari getCurrentUser()
       _profile = Profile.fromJson(result);
       _errorMessage = null;
     } catch (e) {
@@ -57,6 +58,11 @@ class ProfileProvider with ChangeNotifier {
     }
 
     _isLoading = false;
+    notifyListeners();
+  }
+
+  void clearError() {
+    _errorMessage = null;
     notifyListeners();
   }
 }
