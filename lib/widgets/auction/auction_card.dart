@@ -16,18 +16,65 @@ class AuctionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Dapatkan ukuran layar untuk responsivitas
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // Tentukan ukuran berdasarkan lebar layar
+    final isSmallScreen = screenWidth < 360;
+    final isMediumScreen = screenWidth >= 360 && screenWidth < 400;
+    // final isLargeScreen = screenWidth >= 400;
+
+    // Responsif untuk tinggi gambar - dikurangi sedikit
+    final imageHeight =
+        isSmallScreen
+            ? 95.0
+            : isMediumScreen
+            ? 105.0
+            : 115.0;
+
+    // Responsif untuk ukuran font
+    final titleFontSize =
+        isSmallScreen
+            ? 14.0
+            : isMediumScreen
+            ? 15.0
+            : 16.0;
+
+    final priceFontSize =
+        isSmallScreen
+            ? 16.0
+            : isMediumScreen
+            ? 17.0
+            : 18.0;
+
+    final subTextFontSize =
+        isSmallScreen
+            ? 12.0
+            : isMediumScreen
+            ? 13.0
+            : 14.0;
+
+    final dateFontSize =
+        isSmallScreen
+            ? 11.0
+            : isMediumScreen
+            ? 12.0
+            : 13.0;
+
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(
-          context,
-          targetPage, // pastikan rute ini sudah terdaftar
-          arguments: item, // item harus bertipe AuctionItem
-        );
+        Navigator.pushNamed(context, targetPage, arguments: item);
       },
       child: Card(
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: Container(
+          // Batasi tinggi maksimum card dengan buffer untuk overflow
+          constraints: BoxConstraints(
+            maxHeight: screenHeight * 0.32, // Dikurangi dari 35% ke 32%
+            minHeight: 190, // Dikurangi dari 200px ke 190px
+          ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
             gradient: LinearGradient(
@@ -38,8 +85,9 @@ class AuctionCard extends StatelessWidget {
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min, // Fix for bottom overflow
+            mainAxisSize: MainAxisSize.min,
             children: [
+              // Bagian Gambar dengan Stack
               Stack(
                 children: [
                   ClipRRect(
@@ -48,15 +96,17 @@ class AuctionCard extends StatelessWidget {
                     ),
                     child: Image.network(
                       item.imageUrl,
-                      height: 120,
+                      height: imageHeight,
                       width: double.infinity,
                       fit: BoxFit.cover,
                       errorBuilder:
                           (context, error, stackTrace) => Container(
-                            height:
-                                120, // Fixed: Changed from 150 to match image height
+                            height: imageHeight,
                             color: Colors.grey.shade200,
-                            child: const Icon(Icons.broken_image, size: 50),
+                            child: Icon(
+                              Icons.broken_image,
+                              size: isSmallScreen ? 40 : 50,
+                            ),
                           ),
                     ),
                   ),
@@ -64,9 +114,9 @@ class AuctionCard extends StatelessWidget {
                     top: 8,
                     right: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isSmallScreen ? 8 : 12,
+                        vertical: isSmallScreen ? 4 : 6,
                       ),
                       decoration: BoxDecoration(
                         color:
@@ -75,96 +125,106 @@ class AuctionCard extends StatelessWidget {
                       ),
                       child: Text(
                         item.status.toUpperCase(),
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                          fontSize: isSmallScreen ? 10 : 12,
                         ),
                       ),
                     ),
                   ),
                 ],
               ),
-              Flexible(
-                // Added Flexible to prevent overflow
+
+              // Bagian Konten dengan Expanded untuk fleksibilitas
+              Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(
-                    10.0,
-                  ), // Reduced from 12.0 to 10.0
+                  padding: EdgeInsets.all(
+                    isSmallScreen ? 6.0 : 8.0,
+                  ), // Dikurangi padding
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min, // Minimize space usage
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        item.title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 3), // Reduced from 4
-                      Row(
+                      // Bagian atas: Title dan Location
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
-                            Icons.location_on,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              item.locationName,
-                              style: TextStyle(
-                                color: Colors.grey.shade600,
-                                fontSize: 14,
-                              ),
-                              maxLines: 1, // Added to prevent overflow
-                              overflow:
-                                  TextOverflow
-                                      .ellipsis, // Added to prevent overflow
+                          Text(
+                            item.title,
+                            style: TextStyle(
+                              fontSize: titleFontSize,
+                              fontWeight: FontWeight.bold,
                             ),
+                            maxLines: isSmallScreen ? 1 : 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(
+                            height: isSmallScreen ? 1 : 2,
+                          ), // Dikurangi spacing
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.location_on,
+                                size: isSmallScreen ? 14 : 16,
+                                color: Colors.grey,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  item.locationName,
+                                  style: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: subTextFontSize,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                      const SizedBox(height: 3), // Reduced from 4
-                      Text(
-                        currencyFormat.format(
-                          double.parse(item.currentPrice.toString()),
-                        ),
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
-                        ),
-                        maxLines: 1, // Added to prevent overflow
-                        overflow:
-                            TextOverflow.ellipsis, // Added to prevent overflow
-                      ),
-                      const SizedBox(height: 6), // Reduced from 8
-                      Row(
+
+                      // Bagian bawah: Price dan Deadline
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
-                            Icons.access_time,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            // Added Expanded to handle date overflow
-                            child: Text(
-                              "Berakhir: ${DateFormat('dd MMM yyyy').format(item.deadline.toLocal())}",
-                              style: TextStyle(
-                                color: Colors.grey.shade600,
-                                fontSize:
-                                    13, // Reduced from 14 to prevent overflow
-                              ),
-                              maxLines: 1, // Added to prevent overflow
-                              overflow:
-                                  TextOverflow
-                                      .ellipsis, // Added to handle long dates
+                          Text(
+                            currencyFormat.format(
+                              double.parse(item.currentPrice.toString()),
                             ),
+                            style: TextStyle(
+                              fontSize: priceFontSize,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(
+                            height: isSmallScreen ? 2 : 4,
+                          ), // Dikurangi spacing
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.access_time,
+                                size: isSmallScreen ? 14 : 16,
+                                color: Colors.grey,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  "Berakhir: ${DateFormat('dd MMM yyyy').format(item.deadline.toLocal())}",
+                                  style: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: dateFontSize,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

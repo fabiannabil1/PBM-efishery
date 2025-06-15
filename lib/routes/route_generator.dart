@@ -21,6 +21,15 @@ import '../screens/Auctions/my_auction_item_info.dart';
 import '../screens/Auctions/bid_list_screen.dart';
 import '../utils/token_storage.dart';
 import '../screens/profile_screen/edit_profile_screen.dart';
+import '../screens/chat/chat_list_screen.dart';
+import '../screens/chat/chat_detail_screen.dart';
+
+import '../screens/artikel_screen/artikeluser_screen.dart';
+import '../screens/artikerladmin_screen/artikeladmin_screen.dart';
+import '../screens/artikel_screen/add_article_screen.dart';
+import '../screens/artikel_screen/edit_article_screen.dart';
+import '../models/article_model.dart';
+import '../screens/scan/scan_screen.dart';
 
 class RouteGenerator {
   static final GlobalKey<NavigatorState> navigatorKey =
@@ -102,6 +111,38 @@ class RouteGenerator {
 
       case AppRoutes.editProfile:
         return MaterialPageRoute(builder: (_) => const EditProfileScreen());
+
+      case AppRoutes.chatList:
+        return MaterialPageRoute(builder: (_) => const ChatListScreen());
+
+      case AppRoutes.chatDetail:
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder:
+              (_) => ChatDetailScreen(
+                partnerId: args['partnerId'],
+                partnerName: args['partnerName'],
+                partnerPhone: args['partnerPhone'],
+              ),
+        );
+
+      case AppRoutes.articlesList:
+        return MaterialPageRoute(builder: (_) => ArtikelUserScreen());
+
+      case AppRoutes.articlesAdmin:
+        return MaterialPageRoute(builder: (_) => ArtikelAdminScreen());
+
+      case AppRoutes.articlesAdd:
+        return MaterialPageRoute(builder: (_) => const AddArticleScreen());
+
+      case AppRoutes.articlesEdit:
+        final article = settings.arguments as ArticleModel;
+        return MaterialPageRoute(
+          builder: (_) => EditArticleScreen(article: article),
+        );
+
+      case AppRoutes.scan:
+        return MaterialPageRoute(builder: (_) => const ScanScreen());
 
       default:
         return MaterialPageRoute(

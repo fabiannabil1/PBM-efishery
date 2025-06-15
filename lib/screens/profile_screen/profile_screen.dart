@@ -308,7 +308,71 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 value: profile.address ?? '',
                                 iconColor: Colors.blue,
                               ),
-                              const SizedBox(height: 32),
+                              const SizedBox(height: 24),
+
+                              // Chat button
+                              Container(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, '/chat-list');
+                                  },
+                                  icon: const Icon(Icons.chat_bubble_outline),
+                                  label: const Text('Messages'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue.shade400,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 32,
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                    elevation: 2,
+                                    textStyle: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Admin Article Management Button (only show for admin)
+                              if (profile.role?.toLowerCase() == 'admin') ...[
+                                Container(
+                                  width: double.infinity,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        '/articles/admin',
+                                      );
+                                    },
+                                    icon: const Icon(Icons.article),
+                                    label: const Text('Kelola Artikel'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green.shade400,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 32,
+                                        vertical: 12,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(24),
+                                      ),
+                                      elevation: 2,
+                                      textStyle: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                              ],
+
                               ElevatedButton.icon(
                                 onPressed: () {
                                   _showLogoutConfirmation();

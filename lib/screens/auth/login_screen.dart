@@ -45,6 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
         listen: false,
       );
       await profileProvider.fetchProfile(); // Use the provider to load profile
+      if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/home');
 
       // Navigator.pushReplacementNamed(context, '/auctions/menu');

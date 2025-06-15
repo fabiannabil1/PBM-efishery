@@ -7,6 +7,8 @@ import 'providers/auth_provider.dart';
 import 'providers/auction_provider.dart';
 import 'providers/user_provider.dart';
 import 'providers/profile_provider.dart';
+import 'providers/article_provider.dart';
+import 'providers/fish_detection_provider.dart';
 
 import 'routes/app_routes.dart';
 import 'routes/route_generator.dart';
@@ -41,8 +43,9 @@ void main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => ProfileProvider()..fetchProfile(),
-          // Add other providers here as needed
         ),
+        ChangeNotifierProvider(create: (_) => ArticleProvider()),
+        ChangeNotifierProvider(create: (_) => FishDetectionProvider()),
       ],
       child: MyApp(initialToken: token),
     ),

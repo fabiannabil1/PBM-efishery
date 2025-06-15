@@ -6,7 +6,9 @@ import 'package:provider/provider.dart';
 import '../../models/auction_item.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../services/auction_service.dart';
+import '../../services/chat_service.dart';
 import '../../providers/auction_provider.dart';
+import '../../providers/auth_provider.dart';
 
 class AuctionDetailScreen extends StatefulWidget {
   final AuctionItem item;
@@ -276,12 +278,47 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                         const SizedBox(width: 8),
 
                         ElevatedButton(
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/chat',
-                              arguments: item.userId,
-                            );
+                          onPressed: () async {
+                            final token =
+                                Provider.of<AuthProvider>(
+                                  context,
+                                  listen: false,
+                                ).token;
+                            if (token == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please login first'),
+                                ),
+                              );
+                              return;
+                            }
+
+                            try {
+                              final result = await ChatService.getUserByPhone(
+                                token,
+                                item.userId.toString(),
+                              );
+                              if (result['success']) {
+                                final user = result['user'];
+                                Navigator.pushNamed(
+                                  context,
+                                  '/chat-detail',
+                                  arguments: {
+                                    'partnerId': item.userId,
+                                    'partnerName': user['name'] ?? 'User',
+                                    'partnerPhone': user['phone'],
+                                  },
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(result['message'])),
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Error: $e')),
+                              );
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.grey[200],
