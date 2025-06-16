@@ -8,7 +8,7 @@ import '../routes/app_routes.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/Home/home_screen.dart';
 import '../screens/profile_screen/profile_screen.dart';
-import '../screens/dashboard_screen_users/dashboard_screen.dart';
+// import '../screens/dashboard_screen_users/dashboard_screen.dart';
 import '../models/product.dart';
 import '../screens/Auctions/my_auction_screen.dart';
 import '../models/auction_item.dart';
@@ -55,9 +55,6 @@ class RouteGenerator {
 
       case AppRoutes.profile:
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
-
-      case AppRoutes.dashboardusers:
-        return MaterialPageRoute(builder: (_) => DashboardScreen());
 
       case AppRoutes.cartpage:
         return MaterialPageRoute(builder: (_) => CartScreen());
