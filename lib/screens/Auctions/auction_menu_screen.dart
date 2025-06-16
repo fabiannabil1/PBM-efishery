@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auction_provider.dart';
 import '../../widgets/auction/auction_card.dart';
-import '../../widgets/custom-appbar.dart';
+import '../../widgets/custom_appbar.dart';
 import '../../widgets/navbar.dart';
 import '../../widgets/auction/auction_search_bar.dart';
+import '../../providers/profile_provider.dart';
 
 class AuctionMenuScreen extends StatefulWidget {
   const AuctionMenuScreen({super.key});
@@ -29,10 +30,12 @@ class _AuctionMenuScreenState extends State<AuctionMenuScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<AuctionProvider>(context);
+    final auctionProvider = Provider.of<AuctionProvider>(context);
+    final profileProvider = Provider.of<ProfileProvider>(context);
+    final profile = profileProvider.profile;
 
     final filteredAuctions =
-        provider.auctions.where((auction) {
+        auctionProvider.auctions.where((auction) {
           final title = auction.title.toLowerCase();
           return title.contains(_searchQuery.toLowerCase());
         }).toList();
@@ -40,7 +43,7 @@ class _AuctionMenuScreenState extends State<AuctionMenuScreen> {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Menu Lelang', showBackButton: false),
       body:
-          provider.isLoading
+          auctionProvider.isLoading
               ? const Center(child: CircularProgressIndicator())
               : Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -76,13 +79,16 @@ class _AuctionMenuScreenState extends State<AuctionMenuScreen> {
                   ],
                 ),
               ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue,
-        onPressed: () {
-          Navigator.pushNamed(context, '/my-auction');
-        },
-        child: const Icon(Icons.settings, color: Colors.white),
-      ),
+      floatingActionButton:
+          profile?.role != 'biasa'
+              ? FloatingActionButton(
+                backgroundColor: Colors.blue,
+                onPressed: () {
+                  Navigator.pushNamed(context, '/my-auction');
+                },
+                child: const Icon(Icons.settings, color: Colors.white),
+              )
+              : null,
       bottomNavigationBar: BottomNav(
         currentIndex: 2,
         onTap: (index) {
@@ -90,7 +96,6 @@ class _AuctionMenuScreenState extends State<AuctionMenuScreen> {
             Navigator.pushReplacementNamed(context, '/home');
           } else if (index == 1) {
             Navigator.pushReplacementNamed(context, '/market');
-          } else if (index == 2) {
           } else if (index == 3) {
             Navigator.pushReplacementNamed(context, '/profile');
           }

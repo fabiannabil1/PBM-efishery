@@ -1,5 +1,7 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
-import '../../widgets/custom-appbar.dart';
+import '../../widgets/custom_appbar.dart';
 import '../../widgets/navbar.dart';
 
 class MarketScreen extends StatelessWidget {

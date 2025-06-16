@@ -1,10 +1,14 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../models/auction_item.dart';
-import '../../widgets/custom-appbar.dart';
+import '../../widgets/custom_appbar.dart';
 import '../../services/auction_service.dart';
+import '../../services/chat_service.dart';
 import '../../providers/auction_provider.dart';
+import '../../providers/auth_provider.dart';
 
 class AuctionDetailScreen extends StatefulWidget {
   final AuctionItem item;
@@ -178,10 +182,10 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  _buildInfoCard(
+                  _bidInfoCard(
                     context,
                     icon: Icons.monetization_on,
-                    title: 'Harga Saat Ini',
+                    title: 'Current Price - Tap to View Bids',
                     value: currencyFormat.format(
                       num.tryParse(item.currentPrice) ?? 0,
                     ),
@@ -191,6 +195,12 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                       fontSize: 18,
                       color: Colors.green[700],
                     ),
+                    onTap:
+                        () => Navigator.pushNamed(
+                          context,
+                          '/bid-list',
+                          arguments: item.id,
+                        ),
                   ),
                   const SizedBox(height: 12),
 
@@ -265,15 +275,50 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 8),
+
                         ElevatedButton(
-                          onPressed: () {
-                            // TODO: Implement favorite functionality
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Ditambahkan ke favorit'),
-                              ),
-                            );
+                          onPressed: () async {
+                            final token =
+                                Provider.of<AuthProvider>(
+                                  context,
+                                  listen: false,
+                                ).token;
+                            if (token == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please login first'),
+                                ),
+                              );
+                              return;
+                            }
+
+                            try {
+                              final result = await ChatService.getUserByPhone(
+                                token,
+                                item.userId.toString(),
+                              );
+                              if (result['success']) {
+                                final user = result['user'];
+                                Navigator.pushNamed(
+                                  context,
+                                  '/chat-detail',
+                                  arguments: {
+                                    'partnerId': item.userId,
+                                    'partnerName': user['name'] ?? 'User',
+                                    'partnerPhone': user['phone'],
+                                  },
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(result['message'])),
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Error: $e')),
+                              );
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.grey[200],
@@ -283,7 +328,10 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Icon(Icons.favorite_border),
+                          child: const Icon(
+                            Icons.chat_bubble_outline,
+                            size: 24,
+                          ),
                         ),
                       ],
                     ),
@@ -316,6 +364,7 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                       ),
                     ),
                   ],
+                  const SizedBox(height: 64),
                 ],
               ),
             ),
@@ -386,6 +435,73 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
           ),
           if (trailing != null) trailing,
         ],
+      ),
+    );
+  }
+
+  Widget _bidInfoCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String value,
+    required Color iconColor,
+    TextStyle? valueStyle,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: iconColor, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    value,
+                    style:
+                        valueStyle ??
+                        const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

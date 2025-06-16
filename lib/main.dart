@@ -5,6 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'providers/auth_provider.dart';
 import 'providers/auction_provider.dart';
+import 'providers/user_provider.dart';
+import 'providers/profile_provider.dart';
+import 'providers/article_provider.dart';
+import 'providers/fish_detection_provider.dart';
 
 import 'routes/app_routes.dart';
 import 'routes/route_generator.dart';
@@ -32,10 +36,16 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => AuthProvider(sharedPreferences: sharedPreferences),
         ),
+        ChangeNotifierProvider(create: (_) => AuctionProvider()),
         ChangeNotifierProvider(
-          create: (_) => AuctionProvider(),
+          create: (_) => UserProvider(),
           // Add other providers here as needed
         ),
+        ChangeNotifierProvider(
+          create: (_) => ProfileProvider()..fetchProfile(),
+        ),
+        ChangeNotifierProvider(create: (_) => ArticleProvider()),
+        ChangeNotifierProvider(create: (_) => FishDetectionProvider()),
       ],
       child: MyApp(initialToken: token),
     ),

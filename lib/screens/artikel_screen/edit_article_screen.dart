@@ -1,27 +1,24 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../services/auction_service.dart';
-import '../../services/location_service.dart';
-import '../../routes/app_routes.dart';
+import 'package:provider/provider.dart';
+import '../../models/article_model.dart';
+import '../../providers/article_provider.dart';
 import '../../widgets/custom_appbar.dart';
 
-class AddAuctionScreen extends StatefulWidget {
-  const AddAuctionScreen({super.key});
+class EditArticleScreen extends StatefulWidget {
+  final ArticleModel article;
+
+  const EditArticleScreen({super.key, required this.article});
 
   @override
-  State<AddAuctionScreen> createState() => _AddAuctionScreenState();
+  State<EditArticleScreen> createState() => _EditArticleScreenState();
 }
 
-class _AddAuctionScreenState extends State<AddAuctionScreen> {
+class _EditArticleScreenState extends State<EditArticleScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _descController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _locationIdController = TextEditingController();
-  String? _selectedLocationAddress;
-  final _deadlineController = TextEditingController();
+  late final TextEditingController _titleController;
+  late final TextEditingController _contentController;
 
   File? _image;
   bool _isLoading = false;
@@ -31,16 +28,19 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
   static const Color primaryBlue = Color(0xFF1E88E5);
   static const Color lightBlue = Color(0xFF42A5F5);
   static const Color darkBlue = Color(0xFF1565C0);
-  // static const Color accentBlue = Color(0xFF0D47A1);
   static const Color backgroundBlue = Color(0xFFF3F8FF);
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.article.title);
+    _contentController = TextEditingController(text: widget.article.content);
+  }
 
   @override
   void dispose() {
     _titleController.dispose();
-    _descController.dispose();
-    _priceController.dispose();
-    _locationIdController.dispose();
-    _deadlineController.dispose();
+    _contentController.dispose();
     super.dispose();
   }
 
@@ -148,95 +148,28 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
     );
   }
 
-  Future<void> _selectDeadline() async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now().add(const Duration(days: 1)),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: primaryBlue,
-              onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (!mounted) return;
-
-    if (pickedDate != null) {
-      final TimeOfDay? pickedTime = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.now(),
-        builder: (context, child) {
-          return Theme(
-            data: Theme.of(context).copyWith(
-              colorScheme: Theme.of(context).colorScheme.copyWith(
-                primary: primaryBlue,
-                onPrimary: Colors.white,
-                surface: Colors.white,
-                onSurface: Colors.black,
-              ),
-            ),
-            child: child!,
-          );
-        },
-      );
-
-      if (!mounted) return;
-
-      if (pickedTime != null) {
-        final DateTime finalDateTime = DateTime(
-          pickedDate.year,
-          pickedDate.month,
-          pickedDate.day,
-          pickedTime.hour,
-          pickedTime.minute,
-        );
-
-        setState(() {
-          _deadlineController.text = finalDateTime.toIso8601String();
-        });
-      }
-    }
-  }
-
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
-
-    if (_image == null) {
-      _showErrorSnackBar('Gambar harus dipilih');
-      return;
-    }
 
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final success = await AuctionService().createAuction(
+      final success = await context.read<ArticleProvider>().updateArticle(
+        articleId: widget.article.id,
         title: _titleController.text.trim(),
-        description: _descController.text.trim(),
-        locationId: int.parse(_locationIdController.text),
-        startingPrice: double.parse(_priceController.text),
-        deadline: _deadlineController.text,
-        image: _image!,
+        content: _contentController.text.trim(),
+        image: _image,
       );
 
       if (!mounted) return;
 
       if (success) {
-        _showSuccessSnackBar('Lelang berhasil ditambahkan');
+        _showSuccessSnackBar('Artikel berhasil diperbarui');
         Navigator.pop(context, true);
       } else {
-        throw Exception('Gagal menambahkan item lelang');
+        throw Exception('Gagal memperbarui artikel');
       }
     } catch (e) {
       if (mounted) {
@@ -300,60 +233,14 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
     return null;
   }
 
-  String? _validateDescription(String? value) {
+  String? _validateContent(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Deskripsi tidak boleh kosong';
+      return 'Konten tidak boleh kosong';
     }
     if (value.trim().length < 10) {
-      return 'Deskripsi minimal 10 karakter';
+      return 'Konten minimal 10 karakter';
     }
     return null;
-  }
-
-  String? _validatePrice(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Harga awal tidak boleh kosong';
-    }
-    final double? price = double.tryParse(value);
-    if (price == null) {
-      return 'Format harga tidak valid';
-    }
-    if (price <= 0) {
-      return 'Harga harus lebih dari 0';
-    }
-    if (price > 999999999) {
-      return 'Harga terlalu besar';
-    }
-    return null;
-  }
-
-  String? _validateLocationId(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'ID Lokasi tidak boleh kosong';
-    }
-    final int? locationId = int.tryParse(value);
-    if (locationId == null) {
-      return 'ID Lokasi harus berupa angka';
-    }
-    if (locationId <= 0) {
-      return 'ID Lokasi harus lebih dari 0';
-    }
-    return null;
-  }
-
-  String? _validateDeadline(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Deadline tidak boleh kosong';
-    }
-    try {
-      final DateTime deadline = DateTime.parse(value);
-      if (deadline.isBefore(DateTime.now())) {
-        return 'Deadline harus di masa depan';
-      }
-      return null;
-    } catch (e) {
-      return 'Format deadline tidak valid';
-    }
   }
 
   Widget _buildFormField({
@@ -362,13 +249,8 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
     required IconData icon,
     required String? Function(String?) validator,
     String? hint,
-    TextInputType? keyboardType,
-    List<TextInputFormatter>? inputFormatters,
     int? maxLines,
     TextCapitalization? textCapitalization,
-    bool readOnly = false,
-    VoidCallback? onTap,
-    Widget? suffixIcon,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
@@ -386,7 +268,6 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
             ),
             child: Icon(icon, color: primaryBlue, size: 20),
           ),
-          suffixIcon: suffixIcon,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(color: Colors.grey[300]!),
@@ -416,12 +297,8 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
           ),
         ),
         validator: validator,
-        keyboardType: keyboardType,
-        inputFormatters: inputFormatters,
         maxLines: maxLines ?? 1,
         textCapitalization: textCapitalization ?? TextCapitalization.none,
-        readOnly: readOnly,
-        onTap: onTap,
       ),
     );
   }
@@ -430,7 +307,7 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundBlue,
-      appBar: const CustomAppBar(title: 'Buat Lelang', showBackButton: true),
+      appBar: const CustomAppBar(title: 'Edit Artikel', showBackButton: true),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
@@ -459,10 +336,10 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
                   ),
                   child: Column(
                     children: [
-                      Icon(Icons.gavel, size: 48, color: Colors.white),
+                      Icon(Icons.edit_note, size: 48, color: Colors.white),
                       const SizedBox(height: 12),
                       Text(
-                        'Buat Lelang Baru',
+                        'Edit Artikel',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -471,7 +348,7 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Isi informasi produk yang akan dilelang',
+                        'Perbarui informasi artikel Anda',
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.white.withOpacity(0.9),
@@ -516,7 +393,7 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
                             ),
                             const SizedBox(width: 16),
                             Text(
-                              'Informasi Lelang',
+                              'Informasi Artikel',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -529,150 +406,21 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
 
                         _buildFormField(
                           controller: _titleController,
-                          label: 'Judul Lelang',
+                          label: 'Judul Artikel',
                           icon: Icons.title,
-                          hint: 'Masukkan judul lelang',
+                          hint: 'Masukkan judul artikel',
                           validator: _validateTitle,
                           textCapitalization: TextCapitalization.words,
                         ),
 
                         _buildFormField(
-                          controller: _descController,
-                          label: 'Deskripsi',
+                          controller: _contentController,
+                          label: 'Konten Artikel',
                           icon: Icons.description,
-                          hint: 'Deskripsikan item yang akan dilelang',
-                          validator: _validateDescription,
-                          maxLines: 3,
+                          hint: 'Tulis konten artikel lengkap di sini',
+                          validator: _validateContent,
+                          maxLines: 8,
                           textCapitalization: TextCapitalization.sentences,
-                        ),
-
-                        _buildFormField(
-                          controller: _priceController,
-                          label: 'Harga Awal (Rp)',
-                          icon: Icons.monetization_on,
-                          hint: 'Contoh: 100000',
-                          validator: _validatePrice,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                        ),
-
-                        // Location Picker
-                        Container(
-                          margin: const EdgeInsets.only(bottom: 20),
-                          child: InkWell(
-                            onTap: () async {
-                              final result =
-                                  await Navigator.pushNamed(
-                                        context,
-                                        AppRoutes.locationPicker,
-                                      )
-                                      as Map<String, dynamic>?;
-
-                              if (result != null) {
-                                final locationService = LocationService();
-                                try {
-                                  final locationId = await locationService
-                                      .saveLocation(
-                                        name: "Lokasi Lelang",
-                                        latitude: result['latitude'],
-                                        longitude: result['longitude'],
-                                        detailAddress: result['address'],
-                                      );
-
-                                  if (locationId != null) {
-                                    setState(() {
-                                      _locationIdController.text =
-                                          locationId.toString();
-                                      _selectedLocationAddress =
-                                          result['address'];
-                                    });
-                                  }
-                                } catch (e) {
-                                  _showErrorSnackBar(
-                                    'Gagal menyimpan lokasi: $e',
-                                  );
-                                }
-                              }
-                            },
-                            borderRadius: BorderRadius.circular(16),
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color:
-                                      _validateLocationId(
-                                                _locationIdController.text,
-                                              ) !=
-                                              null
-                                          ? Colors.red
-                                          : Colors.grey[300]!,
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                                color: Colors.grey[50],
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    margin: const EdgeInsets.only(right: 16),
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: primaryBlue.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Icon(
-                                      Icons.location_on,
-                                      color: primaryBlue,
-                                      size: 20,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Lokasi',
-                                          style: TextStyle(
-                                            color: Colors.grey[600],
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          _selectedLocationAddress ??
-                                              'Pilih lokasi di peta',
-                                          style: TextStyle(
-                                            color:
-                                                _selectedLocationAddress == null
-                                                    ? Colors.grey
-                                                    : Colors.black87,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Icon(Icons.map, color: primaryBlue),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        _buildFormField(
-                          controller: _deadlineController,
-                          label: 'Deadline',
-                          icon: Icons.schedule,
-                          hint: 'Pilih tanggal dan waktu deadline',
-                          validator: _validateDeadline,
-                          readOnly: true,
-                          onTap: _selectDeadline,
-                          suffixIcon: Icon(
-                            Icons.calendar_today,
-                            color: primaryBlue,
-                          ),
                         ),
                       ],
                     ),
@@ -713,7 +461,7 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
                             ),
                             const SizedBox(width: 16),
                             Text(
-                              'Gambar Produk',
+                              'Gambar Artikel',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -724,6 +472,46 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
                         ),
                         const SizedBox(height: 20),
 
+                        // Show current image if exists
+                        if (widget.article.imageUrl != null &&
+                            _image == null) ...[
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Image.network(
+                                widget.article.imageUrl!,
+                                height: 200,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    height: 200,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: const Center(
+                                      child: Icon(Icons.broken_image, size: 50),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+
+                        // Show new selected image
                         if (_image != null) ...[
                           Container(
                             decoration: BoxDecoration(
@@ -754,14 +542,9 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
                           height: 56,
                           child: OutlinedButton.icon(
                             onPressed: _pickImage,
-                            icon: Icon(
-                              _image == null
-                                  ? Icons.add_photo_alternate
-                                  : Icons.edit,
-                              color: primaryBlue,
-                            ),
+                            icon: Icon(Icons.edit, color: primaryBlue),
                             label: Text(
-                              _image == null ? 'Pilih Gambar' : 'Ganti Gambar',
+                              'Ganti Gambar',
                               style: TextStyle(
                                 color: primaryBlue,
                                 fontWeight: FontWeight.w600,
@@ -825,10 +608,10 @@ class _AddAuctionScreenState extends State<AddAuctionScreen> {
                             : Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.gavel, color: Colors.white),
+                                Icon(Icons.save, color: Colors.white),
                                 const SizedBox(width: 12),
                                 Text(
-                                  'Buat Lelang',
+                                  'Simpan Perubahan',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
