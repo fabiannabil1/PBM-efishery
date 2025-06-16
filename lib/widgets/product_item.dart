@@ -28,7 +28,7 @@ class ProductItem extends StatelessWidget {
           SizedBox(height: 8),
           Text('Rp ${product.price}'),
           Text(product.name),
-          Text(product.weight),
+          // Text(product.weight),
         ],
       ),
     );

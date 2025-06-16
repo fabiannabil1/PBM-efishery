@@ -88,13 +88,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         const SizedBox(height: 16),
 
                         // Weight
-                        Text(
-                          widget.product.weight,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
+                        // Text(
+                        //   widget.product.weight,
+                        //   style: TextStyle(
+                        //     fontSize: 14,
+                        //     color: Colors.grey[600],
+                        //   ),
+                        // ),
                         const SizedBox(height: 8),
 
                         // Stock
