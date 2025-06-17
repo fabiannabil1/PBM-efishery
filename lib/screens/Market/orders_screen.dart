@@ -1,9 +1,10 @@
+// screens/orders_screen.dart
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../../widgets/custom_appbar.dart';
+import 'package:intl/intl.dart';
 import '../../providers/orders_provider.dart';
 import '../../models/orders.dart';
+import '../../widgets/custom_appbar.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -13,13 +14,12 @@ class OrdersScreen extends StatefulWidget {
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
-  String selectedFilter = 'all';
-  
   @override
   void initState() {
     super.initState();
+    // Fetch orders when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<OrderProvider>().fetchOrders();
+      Provider.of<OrderProvider>(context, listen: false).fetchOrders();
     });
   }
 
@@ -45,7 +45,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text('Memuat data pesanan...'),
+                  Text('Memuat pesanan...'),
                 ],
               ),
             );
@@ -59,11 +59,16 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   Icon(
                     Icons.error_outline,
                     size: 64,
-                    color: Colors.grey[400],
+                    color: Colors.red[300],
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Error: ${orderProvider.error}',
+                    'Terjadi kesalahan',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    orderProvider.error!,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey[600]),
                   ),
@@ -80,7 +85,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
             );
           }
 
-          final orders = _getFilteredOrders(orderProvider);
+          final orders = orderProvider.sortedOrders;
 
           if (orders.isEmpty) {
             return Center(
@@ -95,10 +100,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   const SizedBox(height: 16),
                   Text(
                     'Belum ada pesanan',
-                    style: TextStyle(
-                      fontSize: 18,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       color: Colors.grey[600],
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -106,69 +109,70 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     'Pesanan Anda akan muncul di sini',
                     style: TextStyle(
                       color: Colors.grey[500],
+                      fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 24),
-                  ElevatedButton(
+                  ElevatedButton.icon(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Mulai Belanja'),
+                    icon: const Icon(Icons.shopping_cart),
+                    label: const Text('Mulai Belanja'),
                   ),
                 ],
               ),
             );
           }
 
-          return Column(
-            children: [
-              // Summary Cards
-              Container(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _buildSummaryCard(
-                        context,
-                        'Total Pesanan',
-                        '${orderProvider.totalOrders}',
-                        Icons.shopping_bag,
-                        Colors.blue,
-                      ),
+          return RefreshIndicator(
+            onRefresh: () => orderProvider.fetchOrders(),
+            child: Column(
+              children: [
+                // Summary Card
+                Container(
+                  margin: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.blue[400]!, Colors.blue[600]!],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildSummaryCard(
-                        context,
-                        'Total Pendapatan',
-                        currencyFormat.format(orderProvider.totalRevenue),
-                        Icons.monetization_on,
-                        Colors.green,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _buildSummaryItem(
+                          'Total Pesanan',
+                          orders.length.toString(),
+                          Icons.shopping_bag,
+                        ),
+                      ),
+                      Container(
+                        width: 1,
+                        height: 40,
+                        color: Colors.white.withOpacity(0.3),
+                      ),
+                      Expanded(
+                        child: _buildSummaryItem(
+                          'Total Pendapatan',
+                          currencyFormat.format(orderProvider.totalRevenue),
+                          Icons.monetization_on,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
 
-              // Filter Tabs
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    _buildFilterChip('all', 'Semua'),
-                    const SizedBox(width: 8),
-                    _buildFilterChip('today', 'Hari Ini'),
-                    const SizedBox(width: 8),
-                    _buildFilterChip('month', 'Bulan Ini'),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Orders List
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: () async {
-                    await orderProvider.fetchOrders();
-                  },
+                // Orders List
+                Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: orders.length,
@@ -178,305 +182,323 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     },
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         },
       ),
     );
   }
 
-  Widget _buildSummaryCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: color, size: 20),
-              ),
-              const Spacer(),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            title,
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(String value, String label) {
-    final isSelected = selectedFilter == value;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedFilter = value;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? Theme.of(context).primaryColor : Colors.grey[100],
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? Theme.of(context).primaryColor : Colors.grey[300]!,
+  Widget _buildSummaryItem(String title, String value, IconData icon) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.white, size: 24),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.grey[700],
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white70,
             fontSize: 12,
           ),
+          textAlign: TextAlign.center,
         ),
-      ),
+      ],
     );
   }
 
   Widget _buildOrderCard(BuildContext context, OrderModel order, NumberFormat currencyFormat) {
     final dateFormat = DateFormat('dd MMM yyyy, HH:mm', 'id_ID');
     
-    return Container(
+    return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
+      elevation: 2,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-        border: Border.all(color: Colors.grey[200]!),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => _showOrderDetails(context, order),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Product Image
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.grey[200],
-                ),
-                child: order.productImage != null && order.productImage!.isNotEmpty
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          order.productImage!,
-                          width: 60,
-                          height: 60,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Icon(
-                            Icons.image_not_supported,
-                            color: Colors.grey[400],
-                            size: 24,
+              // Header
+              Row(
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: order.imageUrl != null && order.imageUrl!.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              order.imageUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Icon(
+                                Icons.image,
+                                color: Colors.blue[300],
+                              ),
+                            ),
+                          )
+                        : Icon(
+                            Icons.shopping_bag,
+                            color: Colors.blue[300],
+                          ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          order.productName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          dateFormat.format(order.orderDate),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
                           ),
                         ),
-                      )
-                    : Icon(
-                        Icons.shopping_bag,
-                        color: Colors.grey[400],
-                        size: 24,
-                      ),
-              ),
-              const SizedBox(width: 12),
-              
-              // Product Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      order.productName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${order.quantity} item × ${currencyFormat.format(order.price)}',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      dateFormat.format(order.orderDate),
-                      style: TextStyle(
-                        color: Colors.grey[500],
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              
-              // Status Badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _getStatusColor(order.status).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: _getStatusColor(order.status)),
-                ),
-                child: Text(
-                  _getStatusText(order.status),
-                  style: TextStyle(
-                    color: _getStatusColor(order.status),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          
-          const SizedBox(height: 12),
-          const Divider(height: 1),
-          const SizedBox(height: 12),
-          
-          // Payment Info
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Total Bayar',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
+                      ],
                     ),
                   ),
-                  Text(
-                    currencyFormat.format(order.totalPrice),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.green,
-                    ),
-                  ),
+                  _buildStatusBadge(order.status),
                 ],
               ),
-              if (order.change > 0) ...[
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+              const SizedBox(height: 16),
+
+              // Order Details
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
                   children: [
-                    Text(
-                      'Kembalian',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
+                    _buildDetailRow('Jumlah', '${order.quantity} item'),
+                    const SizedBox(height: 8),
+                    _buildDetailRow('Harga Satuan', currencyFormat.format(order.unitPrice)),
+                    const SizedBox(height: 8),
+                    _buildDetailRow(
+                      'Total Harga', 
+                      currencyFormat.format(order.totalPrice),
+                      isTotal: true,
                     ),
-                    Text(
-                      currencyFormat.format(order.change),
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                        color: Colors.blue[700],
+                    if (order.change > 0) ...[
+                      const SizedBox(height: 8),
+                      _buildDetailRow(
+                        'Kembalian', 
+                        currencyFormat.format(order.change),
+                        textColor: Colors.green[600],
                       ),
-                    ),
+                    ],
                   ],
                 ),
-              ],
+              ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  List<OrderModel> _getFilteredOrders(OrderProvider orderProvider) {
-    switch (selectedFilter) {
-      case 'today':
-        return orderProvider.todayOrders;
-      case 'month':
-        return orderProvider.thisMonthOrders;
-      default:
-        return orderProvider.sortedOrders;
-    }
-  }
-
-  Color _getStatusColor(String status) {
+  Widget _buildStatusBadge(String status) {
+    Color color;
+    String text;
+    
     switch (status.toLowerCase()) {
       case 'completed':
-        return Colors.green;
+        color = Colors.green;
+        text = 'Selesai';
+        break;
       case 'pending':
-        return Colors.orange;
+        color = Colors.orange;
+        text = 'Pending';
+        break;
       case 'cancelled':
-        return Colors.red;
+        color = Colors.red;
+        text = 'Dibatalkan';
+        break;
       default:
-        return Colors.blue;
+        color = Colors.grey;
+        text = status;
     }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
   }
 
-  String _getStatusText(String status) {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return 'Selesai';
-      case 'pending':
-        return 'Pending';
-      case 'cancelled':
-        return 'Dibatalkan';
-      default:
-        return 'Selesai';
-    }
+  Widget _buildDetailRow(String label, String value, {bool isTotal = false, Color? textColor}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: textColor ?? (isTotal ? Colors.black : Colors.grey[600]),
+            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+            fontSize: isTotal ? 14 : 12,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            color: textColor ?? (isTotal ? Colors.black : Colors.grey[800]),
+            fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
+            fontSize: isTotal ? 14 : 12,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showOrderDetails(BuildContext context, OrderModel order) {
+    final currencyFormat = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    );
+    final dateFormat = DateFormat('EEEE, dd MMMM yyyy, HH:mm', 'id_ID');
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              const Icon(Icons.receipt_long, color: Colors.blue),
+              const SizedBox(width: 8),
+              const Expanded(child: Text('Detail Pesanan')),
+              IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.close),
+                iconSize: 20,
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Product Image
+                if (order.imageUrl != null && order.imageUrl!.isNotEmpty) ...[
+                  Container(
+                    width: double.infinity,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.grey[200],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        order.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          child: Icon(
+                            Icons.image,
+                            size: 50,
+                            color: Colors.grey[400],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Order Information
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey[200]!),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Informasi Pesanan',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildDetailRow('Produk', order.productName),
+                      const SizedBox(height: 8),
+                      _buildDetailRow('Tanggal Pesanan', dateFormat.format(order.orderDate)),
+                      const SizedBox(height: 8),
+                      _buildDetailRow('Status', order.status),
+                      const Divider(height: 24),
+                      _buildDetailRow('Jumlah', '${order.quantity} item'),
+                      const SizedBox(height: 8),
+                      _buildDetailRow('Harga Satuan', currencyFormat.format(order.unitPrice)),
+                      const SizedBox(height: 8),
+                      _buildDetailRow('Total Harga', currencyFormat.format(order.totalPrice), isTotal: true),
+                      const SizedBox(height: 8),
+                      _buildDetailRow('Jumlah Bayar', currencyFormat.format(order.paymentAmount)),
+                      if (order.change > 0) ...[
+                        const SizedBox(height: 8),
+                        _buildDetailRow(
+                          'Kembalian', 
+                          currencyFormat.format(order.change),
+                          textColor: Colors.green[600],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Tutup'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

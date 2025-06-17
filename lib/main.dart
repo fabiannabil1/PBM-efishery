@@ -10,15 +10,19 @@ import 'providers/profile_provider.dart';
 import 'providers/article_provider.dart';
 import 'providers/fish_detection_provider.dart';
 import 'providers/product_provider.dart';
+import 'providers/orders_provider.dart';
 
 import 'routes/app_routes.dart';
 import 'routes/route_generator.dart';
 import 'utils/constants.dart';
 import 'utils/token_storage.dart';
 
+import 'package:intl/date_symbol_data_local.dart';
+
 void main() async {
   // Ensure Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('id_ID', null);
 
   // Set preferred orientations (optional)
   await SystemChrome.setPreferredOrientations([
@@ -48,6 +52,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ArticleProvider()),
         ChangeNotifierProvider(create: (_) => FishDetectionProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
+        ChangeNotifierProvider(create: (_) => OrderProvider()),
       ],
       child: MyApp(initialToken: token),
     ),
