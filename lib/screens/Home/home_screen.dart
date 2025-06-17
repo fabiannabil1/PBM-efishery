@@ -2,11 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../widgets/custom_appbar.dart';
 import '../../widgets/navbar.dart';
 import '../../widgets/article/articles_section.dart';
 import '../../providers/article_provider.dart';
-
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -50,7 +48,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // Fetch articles when the screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ArticleProvider>().fetchArticles();
-
     });
   }
 
@@ -64,7 +61,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Beranda', showBackButton: false),
       backgroundColor: const Color(0xFFF8FAFC),
       body: FadeTransition(
         opacity: _fadeAnimation,
@@ -77,6 +73,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Enhanced Welcome Section
+                  const SizedBox(height: 32),
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
@@ -326,7 +323,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           Icons.library_books_outlined,
                           size: 20,
                           color: Color(0xFF3282B8),
-
                         ),
                       ),
                       const SizedBox(width: 12),
