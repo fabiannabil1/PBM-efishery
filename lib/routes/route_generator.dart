@@ -57,9 +57,6 @@ class RouteGenerator {
       case AppRoutes.profile:
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
 
-      case AppRoutes.dashboardusers:
-      // return MaterialPageRoute(builder: (_) => DashboardScreen());
-
       case AppRoutes.cartpage:
         return MaterialPageRoute(builder: (_) => OrdersScreen());
 

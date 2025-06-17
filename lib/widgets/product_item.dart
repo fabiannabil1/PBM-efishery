@@ -6,7 +6,6 @@
 //   final ProductModel product;
 
 //   const ProductItem({super.key, required this.product});
-
 //   @override
 //   Widget build(BuildContext context) {
 //     return GestureDetector(
