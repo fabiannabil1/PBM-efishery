@@ -7,6 +7,7 @@ import '../../widgets/navbar.dart';
 import '../../widgets/article/articles_section.dart';
 import '../../providers/article_provider.dart';
 
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -49,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // Fetch articles when the screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ArticleProvider>().fetchArticles();
+
     });
   }
 
@@ -324,6 +326,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           Icons.library_books_outlined,
                           size: 20,
                           color: Color(0xFF3282B8),
+
                         ),
                       ),
                       const SizedBox(width: 12),
