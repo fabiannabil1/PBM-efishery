@@ -171,14 +171,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           color: const Color(0xFF3282B8).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Text(
-                          'Pilih layanan',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: const Color(0xFF3282B8),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                        // child: Text(
+                        //   'Pilih layanan',
+                        //   style: TextStyle(
+                        //     fontSize: 12,
+                        //     color: const Color(0xFF3282B8),
+                        //     fontWeight: FontWeight.w500,
+                        //   ),
+                        // ),
                       ),
                     ],
                   ),
