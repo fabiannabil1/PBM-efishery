@@ -1,5 +1,5 @@
-import 'package:efishery/screens/dashboard_screen_users/cart_screen/cart_screen.dart';
-import 'package:efishery/screens/dashboard_screen_users/product_screen/product_detail_screen.dart';
+import 'package:efishery/screens/Market/orders_screen.dart';
+// import 'package:efishery/screens/dashboard_screen_users/product_screen/product_detail_screen.dart';
 import 'package:efishery/screens/landing_screen.dart';
 import 'package:efishery/screens/auth/register_screen.dart';
 import 'package:efishery/screens/location/location_picker_screen.dart';
@@ -15,6 +15,7 @@ import '../models/auction_item.dart';
 import '../screens/Auctions/add_auction_screen.dart';
 import '../screens/Auctions/my_auction_item_update_screen.dart';
 import '../screens/Market/market_screen.dart';
+import '../screens/Market/detail_produk.dart';
 import '../screens/Auctions/auction_menu_screen.dart';
 import '../screens/Auctions/auction_detail_screen.dart';
 import '../screens/Auctions/my_auction_item_info.dart';
@@ -57,14 +58,12 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
 
       case AppRoutes.cartpage:
-        return MaterialPageRoute(builder: (_) => CartScreen());
+        return MaterialPageRoute(builder: (_) => OrdersScreen());
 
-      case AppRoutes.productdetails:
+      case '/productdetails_page':
+        final product = settings.arguments as ProductModel;
         return MaterialPageRoute(
-          builder:
-              (_) => ProductDetailPage(
-                product: settings.arguments as ProductModel,
-              ),
+          builder: (_) => DetailProdukScreen(product: product),
         );
 
       case AppRoutes.myAuction:

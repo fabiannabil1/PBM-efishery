@@ -1,96 +1,189 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/navbar.dart';
+import '../../models/product.dart';
+import '../../providers/product_provider.dart';
+import '../../widgets/productcard.dart';
+import 'package:intl/intl.dart';
 
-class MarketScreen extends StatelessWidget {
+class MarketScreen extends StatefulWidget {
   const MarketScreen({super.key});
 
   @override
+  _MarketScreenState createState() => _MarketScreenState();
+}
+
+class _MarketScreenState extends State<MarketScreen> {
+  TextEditingController searchController = TextEditingController();
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   final provider = Provider.of<ProductProvider>(context, listen: false);
+  //   provider.fetchProducts();
+  //   searchController.addListener(() {
+  //     provider.filterProducts(searchController.text);
+  //   });
+  // }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = Provider.of<ProductProvider>(context, listen: false);
+      provider.fetchProducts();
+      searchController.addListener(() {
+        provider.filterProducts(searchController.text);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final productProvider = Provider.of<ProductProvider>(context);
+
     return Scaffold(
       appBar: const CustomAppBar(title: 'Market', showBackButton: false),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Search bar
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(12),
+      backgroundColor: const Color.fromARGB(235, 238, 239, 240),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF1E88E5), Color(0xFF64B5F6)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: const Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Selamat Berbelanja!',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'di E-Fishery Market',
+                            style: TextStyle(fontSize: 14, color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.store, size: 60, color: Colors.white),
+                  ],
+                ),
               ),
-              child: const TextField(
+              const SizedBox(height: 24),
+              TextField(
+                controller: searchController,
                 decoration: InputDecoration(
                   hintText: 'Cari produk ikan...',
-                  border: InputBorder.none,
-                  icon: Icon(Icons.search, color: Colors.grey),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: Color(0xFF1E88E5),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 16),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-
-            // Categories
-            const Text(
-              'Kategori',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 100,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildCategoryCard('Ikan Segar', Icons.set_meal, Colors.blue),
-                  _buildCategoryCard(
-                    'Ikan Kering',
-                    Icons.dry_cleaning,
-                    Colors.orange,
+                  const Text(
+                    'Produk Unggulan',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  _buildCategoryCard('Seafood', Icons.restaurant, Colors.green),
-                  _buildCategoryCard('Olahan', Icons.food_bank, Colors.purple),
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text('Lihat Semua'),
+                  ),
                 ],
               ),
-            ),
-            const SizedBox(height: 20),
-
-            // Featured products
-            const Text(
-              'Produk Unggulan',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.8,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                ),
-                itemCount: 6,
-                itemBuilder: (context, index) {
-                  return _buildProductCard(
-                    'Ikan ${['Tuna', 'Salmon', 'Kakap', 'Bandeng', 'Lele', 'Nila'][index]}',
-                    'Rp ${[150000, 200000, 120000, 80000, 60000, 50000][index]}',
-                    'assets/images/petani-ikan.jpg',
-                  );
-                },
-              ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              productProvider.filteredProducts.isEmpty &&
+                      searchController.text.isNotEmpty
+                  ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(50.0),
+                      child: Column(
+                        children: [
+                          const Icon(
+                            Icons.search_off,
+                            size: 64,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Produk tidak ditemukan',
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Coba kata kunci lain',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                  : GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 3 / 4,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                        ),
+                    itemCount: productProvider.filteredProducts.length,
+                    itemBuilder: (context, index) {
+                      final product = productProvider.filteredProducts[index];
+                      return ProductCard(product: product);
+                    },
+                  ),
+              const SizedBox(height: 100),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: BottomNav(
-        currentIndex: 1, // Index untuk Market
+        currentIndex: 1,
         onTap: (index) {
           if (index == 0) {
             Navigator.pushReplacementNamed(context, '/home');
-          } else if (index == 1) {
-            // Sudah di halaman Market
           } else if (index == 2) {
             Navigator.pushReplacementNamed(context, '/auctions/menu');
           } else if (index == 3) {
@@ -98,115 +191,167 @@ class MarketScreen extends StatelessWidget {
           }
         },
       ),
-    );
-  }
-
-  Widget _buildCategoryCard(String title, IconData icon, Color color) {
-    return Container(
-      width: 80,
-      margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProductCard(String name, String price, String imagePath) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 3,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(12),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/cart_page');
+        },
+        backgroundColor: const Color(0xFF1E88E5),
+        child: Stack(
+          children: [
+            const Icon(Icons.shopping_cart, color: Colors.white),
+            // Badge notifikasi
+            Positioned(
+              right: 0,
+              top: 0,
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                image: DecorationImage(
-                  image: AssetImage(imagePath),
-                  fit: BoxFit.cover,
+                constraints: const BoxConstraints(minWidth: 12, minHeight: 12),
+                child: const Text(
+                  '2',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProductCard(
+    String name,
+    String price,
+    String imagePath,
+    String description,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/productdetails_page',
+          arguments: {
+            'name': name,
+            'price':
+                double.tryParse(price.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0.0,
+            'image': imagePath,
+            'description': description,
+          },
+        );
+      },
+      child: Hero(
+        tag: 'product_image_$name',
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          Expanded(
-            flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 3,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(12),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    price,
-                    style: const TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                    image: DecorationImage(
+                      image: AssetImage(imagePath),
+                      fit: BoxFit.cover,
                     ),
                   ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        description,
+                        style: TextStyle(color: Colors.grey[600], fontSize: 10),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        price,
+                        style: const TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
                         ),
                       ),
-                      child: const Text(
-                        'Beli',
-                        style: TextStyle(fontSize: 12, color: Colors.white),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('$name ditambahkan ke keranjang'),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            'Beli',
+                            style: TextStyle(fontSize: 12, color: Colors.white),
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  String _formatPrice(dynamic price) {
+    try {
+      return NumberFormat(
+        '#,##0',
+        'id_ID',
+      ).format(double.tryParse(price.toString()) ?? 0);
+    } catch (_) {
+      return '0';
+    }
   }
 }
