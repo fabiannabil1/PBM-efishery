@@ -1,9 +1,10 @@
+// services/order_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/orders.dart';
 
 class OrderService {
-  static const String baseUrl = 'http://efishery.acerkecil.my.id/api';
+  static const String baseUrl = 'http://efishery.acerkecil.my.id';
 
   Future<bool> createOrder(OrderModel order) async {
     try {
@@ -30,12 +31,8 @@ class OrderService {
 
   Future<List<OrderModel>> fetchOrders() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/orders'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      );
+      final response = await http.get(Uri.parse('http://efishery.acerkecil.my.id/api/orders'));
+
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
@@ -50,24 +47,19 @@ class OrderService {
     }
   }
 
-  Future<OrderModel?> fetchOrderById(int id) async {
+  Future<OrderModel?> getOrderById(int id) async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/orders/$id'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      );
+      final response = await http.get(Uri.parse('http://efishery.acerkecil.my.id/api/orders'));
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final Map<String, dynamic> data = jsonDecode(response.body);
         return OrderModel.fromJson(data);
       } else {
-        print('Failed to fetch order. Status: ${response.statusCode}');
+        print('Failed to get order. Status: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      print('Error fetching order: $e');
+      print('Error getting order: $e');
       return null;
     }
   }
@@ -92,27 +84,6 @@ class OrderService {
       }
     } catch (e) {
       print('Error updating order status: $e');
-      return false;
-    }
-  }
-
-  Future<bool> deleteOrder(int id) async {
-    try {
-      final response = await http.delete(
-        Uri.parse('$baseUrl/orders/$id'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        print('Failed to delete order. Status: ${response.statusCode}');
-        return false;
-      }
-    } catch (e) {
-      print('Error deleting order: $e');
       return false;
     }
   }

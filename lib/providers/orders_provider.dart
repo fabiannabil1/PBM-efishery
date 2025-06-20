@@ -1,3 +1,4 @@
+// providers/order_provider.dart
 import 'package:flutter/material.dart';
 import '../models/orders.dart';
 import '../services/orders_service.dart';
@@ -13,52 +14,24 @@ class OrderProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
+  // List<OrderModel> get orders => _orders;
+
+  void addOrder(OrderModel order) {
+    _orders.add(order);
+    notifyListeners();
+  }
+
+  // Jika ingin fitur tambahan:
+  void clearOrders() {
+    _orders.clear();
+    notifyListeners();
+  }
+
   // Get orders sorted by date (newest first)
   List<OrderModel> get sortedOrders {
     final sorted = List<OrderModel>.from(_orders);
     sorted.sort((a, b) => b.orderDate.compareTo(a.orderDate));
     return sorted;
-  }
-
-  // Get orders by status
-  List<OrderModel> getOrdersByStatus(String status) {
-    return _orders.where((order) => order.status == status).toList();
-  }
-
-  // Get total orders count
-  int get totalOrders => _orders.length;
-
-  // Get total revenue
-  double get totalRevenue {
-    return _orders.fold(0.0, (sum, order) => sum + order.totalPrice);
-  }
-
-  Future<bool> createOrder(OrderModel order) async {
-    try {
-      _isLoading = true;
-      _error = null;
-      notifyListeners();
-
-      final success = await _orderService.createOrder(order);
-      
-      if (success) {
-        // Add to local list immediately for better UX
-        _orders.add(order.copyWith(
-          id: DateTime.now().millisecondsSinceEpoch, // Temporary ID
-        ));
-        // Fetch latest data from server
-        await fetchOrders();
-      }
-
-      _isLoading = false;
-      notifyListeners();
-      return success;
-    } catch (e) {
-      _error = e.toString();
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
   }
 
   Future<void> fetchOrders() async {
@@ -67,8 +40,7 @@ class OrderProvider extends ChangeNotifier {
       _error = null;
       notifyListeners();
 
-      final orders = await _orderService.fetchOrders();
-      _orders = orders;
+      _orders = await _orderService.fetchOrders();
 
       _isLoading = false;
       notifyListeners();
@@ -79,13 +51,34 @@ class OrderProvider extends ChangeNotifier {
     }
   }
 
-  Future<OrderModel?> fetchOrderById(int id) async {
+  Future<bool> createOrder(OrderModel order) async {
     try {
+      _isLoading = true;
       _error = null;
       notifyListeners();
 
-      final order = await _orderService.fetchOrderById(id);
-      return order;
+      final result = await _orderService.createOrder(order);
+
+      if (result) {
+        // Add order to local list without fetching all orders again
+        _orders.add(order);
+        notifyListeners();
+      }
+
+      _isLoading = false;
+      notifyListeners();
+      return result;
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<OrderModel?> getOrderById(int id) async {
+    try {
+      return await _orderService.getOrderById(id);
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -99,42 +92,30 @@ class OrderProvider extends ChangeNotifier {
       _error = null;
       notifyListeners();
 
-      final success = await _orderService.updateOrderStatus(id, status);
-      
-      if (success) {
-        // Update local data
-        final index = _orders.indexWhere((order) => order.id == id);
-        if (index != -1) {
-          _orders[index] = _orders[index].copyWith(status: status);
+      final result = await _orderService.updateOrderStatus(id, status);
+
+      if (result) {
+        // Update local order status
+        final orderIndex = _orders.indexWhere((order) => order.id == id);
+        if (orderIndex != -1) {
+          _orders[orderIndex] = OrderModel(
+            id: _orders[orderIndex].id,
+            productName: _orders[orderIndex].productName,
+            quantity: _orders[orderIndex].quantity,
+            unitPrice: _orders[orderIndex].unitPrice,
+            totalPrice: _orders[orderIndex].totalPrice,
+            paymentAmount: _orders[orderIndex].paymentAmount,
+            change: _orders[orderIndex].change,
+            orderDate: _orders[orderIndex].orderDate,
+            status: status,
+            imageUrl: _orders[orderIndex].imageUrl,
+          );
         }
       }
 
       _isLoading = false;
       notifyListeners();
-      return success;
-    } catch (e) {
-      _error = e.toString();
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-  }
-
-  Future<bool> deleteOrder(int id) async {
-    try {
-      _isLoading = true;
-      _error = null;
-      notifyListeners();
-
-      final success = await _orderService.deleteOrder(id);
-      
-      if (success) {
-        _orders.removeWhere((order) => order.id == id);
-      }
-
-      _isLoading = false;
-      notifyListeners();
-      return success;
+      return result;
     } catch (e) {
       _error = e.toString();
       _isLoading = false;
@@ -148,29 +129,18 @@ class OrderProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Filter orders by date range
-  List<OrderModel> getOrdersByDateRange(DateTime startDate, DateTime endDate) {
-    return _orders.where((order) {
-      return order.orderDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
-             order.orderDate.isBefore(endDate.add(const Duration(days: 1)));
-    }).toList();
+  // Get total revenue from completed orders
+  double get totalRevenue {
+    return _orders
+        .where((order) => order.status == 'completed')
+        .fold(0.0, (sum, order) => sum + order.totalPrice);
   }
 
-  // Get orders for today
-  List<OrderModel> get todayOrders {
-    final today = DateTime.now();
-    final startOfDay = DateTime(today.year, today.month, today.day);
-    final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
-    
-    return getOrdersByDateRange(startOfDay, endOfDay);
-  }
+  // Get total orders count
+  int get totalOrdersCount => _orders.length;
 
-  // Get orders for this month
-  List<OrderModel> get thisMonthOrders {
-    final now = DateTime.now();
-    final startOfMonth = DateTime(now.year, now.month, 1);
-    final endOfMonth = DateTime(now.year, now.month + 1, 0);
-    
-    return getOrdersByDateRange(startOfMonth, endOfMonth);
+  // Get orders by status
+  List<OrderModel> getOrdersByStatus(String status) {
+    return _orders.where((order) => order.status == status).toList();
   }
 }
