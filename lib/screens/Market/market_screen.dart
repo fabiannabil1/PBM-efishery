@@ -47,7 +47,7 @@ class _MarketScreenState extends State<MarketScreen> {
     final productProvider = Provider.of<ProductProvider>(context);
 
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Market', showBackButton: false),
+      // appBar: const CustomAppBar(title: 'Market', showBackButton: false),
       backgroundColor: const Color.fromARGB(235, 238, 239, 240),
       body: RefreshIndicator(
         onRefresh: _onRefresh,
