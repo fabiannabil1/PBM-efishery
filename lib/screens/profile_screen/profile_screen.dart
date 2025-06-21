@@ -3,8 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/profile_provider.dart';
+import '../../providers/role_change_provider.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/navbar.dart';
+import 'request_role_change_dialog.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -23,6 +25,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_provider == null) {
       _provider = Provider.of<ProfileProvider>(context, listen: false);
       _provider!.addListener(_handleProviderChanges);
+
+      // Initialize role change provider
+      final roleChangeProvider = Provider.of<RoleChangeProvider>(
+        context,
+        listen: false,
+      );
+      roleChangeProvider.checkRequestStatus();
     }
   }
 
@@ -259,22 +268,104 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                profile.role ?? 'User',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                ),
-                              ),
+                            Consumer<RoleChangeProvider>(
+                              builder: (context, roleChangeProvider, child) {
+                                return Column(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        profile.role ?? 'User',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                    if (profile.role?.toLowerCase() ==
+                                            'biasa' &&
+                                        !roleChangeProvider
+                                            .hasPendingRequest) ...[
+                                      const SizedBox(height: 8),
+                                      TextButton.icon(
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder:
+                                                (context) =>
+                                                    const RequestRoleChangeDialog(),
+                                          );
+                                        },
+                                        icon: const Icon(
+                                          Icons.upgrade,
+                                          size: 18,
+                                        ),
+                                        label: const Text('Upgrade ke Mitra'),
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.white
+                                              .withOpacity(0.2),
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 8,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ] else if (roleChangeProvider
+                                        .hasPendingRequest) ...[
+                                      const SizedBox(height: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.orange.withOpacity(0.2),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.orange.withOpacity(
+                                              0.3,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.pending_outlined,
+                                              size: 16,
+                                              color: Colors.orange.shade200,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              roleChangeProvider
+                                                  .requestStatusText,
+                                              style: TextStyle(
+                                                color: Colors.orange.shade200,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                );
+                              },
                             ),
                           ],
                         ),

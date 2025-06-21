@@ -19,16 +19,6 @@ class MarketScreen extends StatefulWidget {
 class _MarketScreenState extends State<MarketScreen> {
   TextEditingController searchController = TextEditingController();
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   final provider = Provider.of<ProductProvider>(context, listen: false);
-  //   provider.fetchProducts();
-  //   searchController.addListener(() {
-  //     provider.filterProducts(searchController.text);
-  //   });
-  // }
-
   @override
   void initState() {
     super.initState();
@@ -39,6 +29,11 @@ class _MarketScreenState extends State<MarketScreen> {
         provider.filterProducts(searchController.text);
       });
     });
+  }
+
+  Future<void> _onRefresh() async {
+    final provider = Provider.of<ProductProvider>(context, listen: false);
+    await provider.fetchProducts();
   }
 
   @override
@@ -54,128 +49,140 @@ class _MarketScreenState extends State<MarketScreen> {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Market', showBackButton: false),
       backgroundColor: const Color.fromARGB(235, 238, 239, 240),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF1E88E5), Color(0xFF64B5F6)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+      body: RefreshIndicator(
+        onRefresh: _onRefresh,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF1E88E5), Color(0xFF64B5F6)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: const Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Selamat Berbelanja!',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                  child: const Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Selamat Berbelanja!',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'di E-Fishery Market',
-                            style: TextStyle(fontSize: 14, color: Colors.white),
-                          ),
-                        ],
+                            SizedBox(height: 8),
+                            Text(
+                              'di E-Fishery Market',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(Icons.store, size: 60, color: Colors.white),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Cari produk ikan...',
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: Color(0xFF1E88E5),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Produk Unggulan',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Icon(Icons.store, size: 60, color: Colors.white),
+                    TextButton(
+                      onPressed: () {},
+                      child: const Text('Lihat Semua'),
+                    ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 24),
-              TextField(
-                controller: searchController,
-                decoration: InputDecoration(
-                  hintText: 'Cari produk ikan...',
-                  prefixIcon: const Icon(
-                    Icons.search,
-                    color: Color(0xFF1E88E5),
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Produk Unggulan',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text('Lihat Semua'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              productProvider.filteredProducts.isEmpty &&
-                      searchController.text.isNotEmpty
-                  ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(50.0),
-                      child: Column(
-                        children: [
-                          const Icon(
-                            Icons.search_off,
-                            size: 64,
-                            color: Colors.grey,
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Produk tidak ditemukan',
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Coba kata kunci lain',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
+                const SizedBox(height: 16),
+                productProvider.filteredProducts.isEmpty &&
+                        searchController.text.isNotEmpty
+                    ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(50.0),
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.search_off,
+                              size: 64,
+                              color: Colors.grey,
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                  : GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 3 / 4,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Produk tidak ditemukan',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Coba kata kunci lain',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
                         ),
-                    itemCount: productProvider.filteredProducts.length,
-                    itemBuilder: (context, index) {
-                      final product = productProvider.filteredProducts[index];
-                      return ProductCard(product: product);
-                    },
-                  ),
-              const SizedBox(height: 100),
-            ],
+                      ),
+                    )
+                    : GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 3 / 4,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                          ),
+                      itemCount: productProvider.filteredProducts.length,
+                      itemBuilder: (context, index) {
+                        final product = productProvider.filteredProducts[index];
+                        return ProductCard(product: product);
+                      },
+                    ),
+                const SizedBox(height: 100),
+              ],
+            ),
           ),
         ),
       ),

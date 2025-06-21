@@ -24,8 +24,13 @@ class _AuctionMenuScreenState extends State<AuctionMenuScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
-      _auctionProvider?.startAutoRefresh();
+      _auctionProvider?.loadAuctionItems();
+      // _auctionProvider?.startAutoRefresh();
     });
+  }
+
+  Future<void> _onRefresh() async {
+    await _auctionProvider?.loadAuctionItems();
   }
 
   @override
@@ -58,22 +63,25 @@ class _AuctionMenuScreenState extends State<AuctionMenuScreen> {
                     ),
                     const SizedBox(height: 10),
                     Expanded(
-                      child: GridView.builder(
-                        itemCount: filteredAuctions.length,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              childAspectRatio: 0.75,
-                              crossAxisSpacing: 10,
-                              mainAxisSpacing: 10,
-                            ),
-                        itemBuilder: (context, index) {
-                          final auction = filteredAuctions[index];
-                          return AuctionCard(
-                            item: auction,
-                            targetPage: '/auction/detail',
-                          );
-                        },
+                      child: RefreshIndicator(
+                        onRefresh: _onRefresh,
+                        child: GridView.builder(
+                          itemCount: filteredAuctions.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                childAspectRatio: 0.75,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                              ),
+                          itemBuilder: (context, index) {
+                            final auction = filteredAuctions[index];
+                            return AuctionCard(
+                              item: auction,
+                              targetPage: '/auction/detail',
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ],
