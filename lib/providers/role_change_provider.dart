@@ -18,7 +18,8 @@ class RoleChangeProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await _roleChangeService.requestRoleChange(reason);
+      // final result = await _roleChangeService.requestRoleChange(reason);
+      await _roleChangeService.requestRoleChange(reason);
       _errorMessage = null;
       await checkRequestStatus(); // Refresh status after request
       return true;

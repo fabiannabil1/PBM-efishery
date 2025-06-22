@@ -7,7 +7,7 @@ import '../../widgets/navbar.dart';
 // import '../../models/product.dart';
 import '../../providers/product_provider.dart';
 import '../../widgets/productcard.dart';
-import 'package:intl/intl.dart';
+// import 'package:intl/intl.dart';
 
 class MarketScreen extends StatefulWidget {
   const MarketScreen({super.key});
@@ -293,131 +293,131 @@ class _MarketScreenState extends State<MarketScreen> {
     );
   }
 
-  Widget _buildProductCard(
-    String name,
-    String price,
-    String imagePath,
-    String description,
-  ) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(
-          context,
-          '/productdetails_page',
-          arguments: {
-            'name': name,
-            'price':
-                double.tryParse(price.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0.0,
-            'image': imagePath,
-            'description': description,
-          },
-        );
-      },
-      child: Hero(
-        tag: 'product_image_$name',
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 5,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 3,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(12),
-                    ),
-                    image: DecorationImage(
-                      image: AssetImage(imagePath),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        description,
-                        style: TextStyle(color: Colors.grey[600], fontSize: 10),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        price,
-                        style: const TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('$name ditambahkan ke keranjang'),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            'Beli',
-                            style: TextStyle(fontSize: 12, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  //   Widget _buildProductCard(
+  //     String name,
+  //     String price,
+  //     String imagePath,
+  //     String description,
+  //   ) {
+  //     return GestureDetector(
+  //       onTap: () {
+  //         Navigator.pushNamed(
+  //           context,
+  //           '/productdetails_page',
+  //           arguments: {
+  //             'name': name,
+  //             'price':
+  //                 double.tryParse(price.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0.0,
+  //             'image': imagePath,
+  //             'description': description,
+  //           },
+  //         );
+  //       },
+  //       child: Hero(
+  //         tag: 'product_image_$name',
+  //         child: Container(
+  //           decoration: BoxDecoration(
+  //             color: Colors.white,
+  //             borderRadius: BorderRadius.circular(12),
+  //             boxShadow: [
+  //               BoxShadow(
+  //                 color: Colors.grey.withOpacity(0.1),
+  //                 spreadRadius: 1,
+  //                 blurRadius: 5,
+  //                 offset: const Offset(0, 2),
+  //               ),
+  //             ],
+  //           ),
+  //           child: Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               Expanded(
+  //                 flex: 3,
+  //                 child: Container(
+  //                   decoration: BoxDecoration(
+  //                     borderRadius: const BorderRadius.vertical(
+  //                       top: Radius.circular(12),
+  //                     ),
+  //                     image: DecorationImage(
+  //                       image: AssetImage(imagePath),
+  //                       fit: BoxFit.cover,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //               Expanded(
+  //                 flex: 2,
+  //                 child: Padding(
+  //                   padding: const EdgeInsets.all(8.0),
+  //                   child: Column(
+  //                     crossAxisAlignment: CrossAxisAlignment.start,
+  //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                     children: [
+  //                       Text(
+  //                         name,
+  //                         style: const TextStyle(
+  //                           fontWeight: FontWeight.bold,
+  //                           fontSize: 14,
+  //                         ),
+  //                         maxLines: 1,
+  //                         overflow: TextOverflow.ellipsis,
+  //                       ),
+  //                       Text(
+  //                         description,
+  //                         style: TextStyle(color: Colors.grey[600], fontSize: 10),
+  //                         maxLines: 1,
+  //                         overflow: TextOverflow.ellipsis,
+  //                       ),
+  //                       Text(
+  //                         price,
+  //                         style: const TextStyle(
+  //                           color: Colors.blue,
+  //                           fontWeight: FontWeight.bold,
+  //                           fontSize: 12,
+  //                         ),
+  //                       ),
+  //                       SizedBox(
+  //                         width: double.infinity,
+  //                         child: ElevatedButton(
+  //                           onPressed: () {
+  //                             ScaffoldMessenger.of(context).showSnackBar(
+  //                               SnackBar(
+  //                                 content: Text('$name ditambahkan ke keranjang'),
+  //                               ),
+  //                             );
+  //                           },
+  //                           style: ElevatedButton.styleFrom(
+  //                             backgroundColor: Colors.blue,
+  //                             padding: const EdgeInsets.symmetric(vertical: 4),
+  //                             shape: RoundedRectangleBorder(
+  //                               borderRadius: BorderRadius.circular(8),
+  //                             ),
+  //                           ),
+  //                           child: const Text(
+  //                             'Beli',
+  //                             style: TextStyle(fontSize: 12, color: Colors.white),
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     );
+  //   }
 
-  String _formatPrice(dynamic price) {
-    try {
-      return NumberFormat(
-        '#,##0',
-        'id_ID',
-      ).format(double.tryParse(price.toString()) ?? 0);
-    } catch (_) {
-      return '0';
-    }
-  }
+  //   String _formatPrice(dynamic price) {
+  //     try {
+  //       return NumberFormat(
+  //         '#,##0',
+  //         'id_ID',
+  //       ).format(double.tryParse(price.toString()) ?? 0);
+  //     } catch (_) {
+  //       return '0';
+  //     }
+  //   }
 }
