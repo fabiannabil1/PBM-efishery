@@ -263,7 +263,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                         child: TextButton.icon(
                           onPressed:
-                              () => Navigator.pushReplacementNamed(
+                              () => Navigator.pushNamed(
                                 context,
                                 '/auctions/menu',
                               ),
@@ -301,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       scrollDirection: Axis.horizontal,
                       itemCount:
                           Provider.of<AuctionProvider>(context).auctions.length,
-                      itemBuilder: (context, index) { 
+                      itemBuilder: (context, index) {
                         return _buildEnhancedAuctionCard(index);
                       },
                     ),
@@ -346,10 +346,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                         child: TextButton.icon(
                           onPressed:
-                              () => Navigator.pushReplacementNamed(
-                                context,
-                                '/articles',
-                              ),
+                              () => Navigator.pushNamed(context, '/articles'),
                           style: TextButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,

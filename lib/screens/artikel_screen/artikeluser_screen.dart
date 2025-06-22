@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/article_model.dart';
 import '../../providers/article_provider.dart';
+import '../../widgets/custom_appbar.dart';
 
 class ArtikelUserScreen extends StatefulWidget {
   const ArtikelUserScreen({Key? key}) : super(key: key);
@@ -27,15 +28,7 @@ class _ArtikelUserScreenState extends State<ArtikelUserScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          'Baca Artikel',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        backgroundColor: const Color(0xFF1565C0),
-        elevation: 0,
-        centerTitle: true,
-      ),
+      appBar: CustomAppBar(title: 'Artikel', showBackButton: true),
       body: Consumer<ArticleProvider>(
         builder: (context, articleProvider, child) {
           if (articleProvider.isLoading) {
