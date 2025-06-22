@@ -1,9 +1,7 @@
 name: efishery
 description: "Platform Budidaya Ikan Terintegrasi untuk Petani Ikan"
 
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-
-
+publish_to: 'none'
 version: 1.0.0+1
 
 environment:
@@ -12,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   cupertino_icons: ^1.0.8
   http: ^1.4.0
   flutter_map: ^8.1.1
@@ -32,19 +29,15 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   flutter_native_splash: ^2.4.6
   flutter_launcher_icons: ^0.14.4
   flutter_lints: ^5.0.0
 
-
 flutter:
   uses-material-design: true
-  
   assets:
     - assets/images/
 
-# Konfigurasi untuk App Icon
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
@@ -63,17 +56,12 @@ flutter_launcher_icons:
     generate: true
     image_path: "assets/images/logo.png"
 
-# Konfigurasi untuk Splash Screen
 flutter_native_splash:
   color: "#0288D1"
   image: assets/images/logo.png
-  
-  # Android 12+ support
+  android: true
+  ios: true
+  web: true
   android_12:
-    image: assets/images/logo.png
-    color: "#0288D1"
-    
-  # Web support
-  web:
     image: assets/images/logo.png
     color: "#0288D1"
