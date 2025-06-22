@@ -59,51 +59,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
             'Silahkan Login Ulang',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          content: Text(
-            // errorMessage,
+          content: const Text(
             'Gagal Memuat Profil',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16),
+            style: TextStyle(fontSize: 16),
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
-                _handleLogout();
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.red,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _handleLogout();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Login Ulang',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
               ),
-              child: const Text(
-                'Login Ulang',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
             ),
-            // ElevatedButton(
-            //   onPressed: () {
-            //     Navigator.of(context).pop(); // Close dialog
-            //     _handleRetryLogin();
-            //   },
-            //   style: ElevatedButton.styleFrom(
-            //     backgroundColor: Colors.blue,
-            //     foregroundColor: Colors.white,
-            //     padding: const EdgeInsets.symmetric(
-            //       horizontal: 20,
-            //       vertical: 12,
-            //     ),
-            //     shape: RoundedRectangleBorder(
-            //       borderRadius: BorderRadius.circular(8),
-            //     ),
-            //   ),
-            //   child: const Text(
-            //     'Login Ulang',
-            //     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            //   ),
-            // ),
           ],
         );
       },
@@ -114,11 +96,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // Navigate to logout route
     Navigator.pushReplacementNamed(context, '/logout');
   }
-
-  // void _handleRetryLogin() {
-  //   // Navigate to login screen
-  //   Navigator.pushReplacementNamed(context, '/login');
-  // }
 
   @override
   void dispose() {
@@ -183,11 +160,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         child: Align(
                           alignment: Alignment.centerRight,
-                          child: IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.white),
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/edit-profile');
-                            },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.white),
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/edit-profile');
+                              },
+                            ),
                           ),
                         ),
                       ),
@@ -249,25 +232,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 color: Colors.white,
                               ),
                             ),
-                            const SizedBox(height: 0),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 6,
-                              ),
-                              // decoration: BoxDecoration(
-                              //   color: Colors.white.withOpacity(0.2),
-                              //   borderRadius: BorderRadius.circular(20),
-                              // ),
-                              child: Text(
-                                profile.bio ?? 'Bio',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                ),
+                            const SizedBox(height: 8),
+                            Text(
+                              profile.bio ?? 'Bio',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 16),
                             Consumer<RoleChangeProvider>(
                               builder: (context, roleChangeProvider, child) {
                                 return Column(
@@ -275,7 +248,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 16,
-                                        vertical: 6,
+                                        vertical: 8,
                                       ),
                                       decoration: BoxDecoration(
                                         color: Colors.white.withOpacity(0.2),
@@ -286,6 +259,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 14,
+                                          fontWeight: FontWeight.w500,
                                         ),
                                       ),
                                     ),
@@ -293,8 +267,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             'biasa' &&
                                         !roleChangeProvider
                                             .hasPendingRequest) ...[
-                                      const SizedBox(height: 8),
-                                      TextButton.icon(
+                                      const SizedBox(height: 12),
+                                      ElevatedButton.icon(
                                         onPressed: () {
                                           showDialog(
                                             context: context,
@@ -308,10 +282,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           size: 18,
                                         ),
                                         label: const Text('Upgrade ke Mitra'),
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: Colors.white
-                                              .withOpacity(0.2),
-                                          foregroundColor: Colors.white,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                          foregroundColor: Colors.blue,
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 16,
                                             vertical: 8,
@@ -321,11 +294,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                               20,
                                             ),
                                           ),
+                                          elevation: 0,
                                         ),
                                       ),
                                     ] else if (roleChangeProvider
                                         .hasPendingRequest) ...[
-                                      const SizedBox(height: 8),
+                                      const SizedBox(height: 12),
                                       Container(
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 16,
@@ -399,93 +373,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 value: profile.address ?? '',
                                 iconColor: Colors.blue,
                               ),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 32),
 
-                              // Chat button
-                              Container(
-                                width: double.infinity,
-                                child: ElevatedButton.icon(
-                                  onPressed: () {
-                                    Navigator.pushNamed(context, '/chat-list');
-                                  },
-                                  icon: const Icon(Icons.chat_bubble_outline),
-                                  label: const Text('Messages'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue.shade400,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 32,
-                                      vertical: 12,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(24),
-                                    ),
-                                    elevation: 2,
-                                    textStyle: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
+                              // Action buttons
+                              _buildActionButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/chat-list');
+                                },
+                                icon: Icons.chat_bubble_outline,
+                                label: 'Messages',
+                                color: Colors.blue,
                               ),
                               const SizedBox(height: 16),
 
                               // Admin Article Management Button (only show for admin)
                               if (profile.role?.toLowerCase() == 'admin') ...[
-                                Container(
-                                  width: double.infinity,
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      Navigator.pushNamed(
-                                        context,
-                                        '/articles/admin',
-                                      );
-                                    },
-                                    icon: const Icon(Icons.article),
-                                    label: const Text('Kelola Artikel'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.green.shade400,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 32,
-                                        vertical: 12,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(24),
-                                      ),
-                                      elevation: 2,
-                                      textStyle: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
+                                _buildActionButton(
+                                  onPressed: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      '/articles/admin',
+                                    );
+                                  },
+                                  icon: Icons.article,
+                                  label: 'Kelola Artikel',
+                                  color: Colors.green,
                                 ),
                                 const SizedBox(height: 16),
                               ],
 
-                              ElevatedButton.icon(
+                              _buildActionButton(
                                 onPressed: () {
                                   _showLogoutConfirmation();
                                 },
-                                icon: const Icon(Icons.logout),
-                                label: const Text('Logout'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red.shade400,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 32,
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(24),
-                                  ),
-                                  elevation: 2,
-                                  textStyle: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                                icon: Icons.logout,
+                                label: 'Logout',
+                                color: Colors.red,
                               ),
                             ],
                           ),
@@ -531,35 +454,83 @@ class _ProfileScreenState extends State<ProfileScreen> {
             style: TextStyle(fontSize: 16),
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'Batal',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.pushReplacementNamed(context, '/logout');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Batal',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              child: const Text(
-                'Logout',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.pushReplacementNamed(context, '/logout');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Logout',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildActionButton({
+    required VoidCallback onPressed,
+    required IconData icon,
+    required String label,
+    required Color color,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon),
+        label: Text(label),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 2,
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+      ),
     );
   }
 

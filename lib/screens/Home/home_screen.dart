@@ -2,9 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../../widgets/navbar.dart';
 import '../../widgets/article/articles_section.dart';
 import '../../providers/article_provider.dart';
+import '../../providers/auction_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,6 +20,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  AuctionProvider? _auctionProvider;
 
   @override
   void initState() {
@@ -45,9 +48,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _fadeController.forward();
     _slideController.forward();
 
-    // Fetch articles when the screen loads
+    // Fetch articles and auctions when the screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ArticleProvider>().fetchArticles();
+      _auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
+      _auctionProvider?.loadAuctionItems();
     });
   }
 
@@ -171,14 +176,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           color: const Color(0xFF3282B8).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        // child: Text(
-                        //   'Pilih layanan',
-                        //   style: TextStyle(
-                        //     fontSize: 12,
-                        //     color: const Color(0xFF3282B8),
-                        //     fontWeight: FontWeight.w500,
-                        //   ),
-                        // ),
                       ),
                     ],
                   ),
@@ -302,8 +299,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     height: 200,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: 5,
-                      itemBuilder: (context, index) {
+                      itemCount:
+                          Provider.of<AuctionProvider>(context).auctions.length,
+                      itemBuilder: (context, index) { 
                         return _buildEnhancedAuctionCard(index);
                       },
                     ),
@@ -312,26 +310,67 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                   // Articles Section with enhanced header
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF3282B8).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          Icons.library_books_outlined,
-                          size: 20,
-                          color: Color(0xFF3282B8),
-                        ),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF3282B8).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.trending_up,
+                              size: 20,
+                              color: Color(0xFF3282B8),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Artikel Terbaru',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0F4C75),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'Artikel Terbaru',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0F4C75),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: const Color(0xFF3282B8).withOpacity(0.3),
+                          ),
+                        ),
+                        child: TextButton.icon(
+                          onPressed:
+                              () => Navigator.pushReplacementNamed(
+                                context,
+                                '/articles',
+                              ),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          icon: const Icon(
+                            Icons.arrow_forward_ios,
+                            size: 12,
+                            color: Color(0xFF3282B8),
+                          ),
+                          label: const Text(
+                            'Lihat Semua',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF3282B8),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -418,148 +457,168 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildEnhancedAuctionCard(int index) {
-    final List<Map<String, dynamic>> sampleData = [
-      {
-        'name': 'Ikan Tuna Segar',
-        'price': 'Rp 150.000',
-        'time': '2 jam lagi',
-        'image': 'assets/images/petani-ikan.jpg',
-        'status': 'Hot',
-      },
-      {
-        'name': 'Udang Windu',
-        'price': 'Rp 85.000',
-        'time': '4 jam lagi',
-        'image': 'assets/images/petani-ikan.jpg',
-        'status': 'New',
-      },
-      {
-        'name': 'Ikan Kakap Merah',
-        'price': 'Rp 120.000',
-        'time': '1 jam lagi',
-        'image': 'assets/images/petani-ikan.jpg',
-        'status': 'Ending',
-      },
-    ];
+    final auctionProvider = Provider.of<AuctionProvider>(context);
+    final auctions = auctionProvider.auctions;
 
-    final data = sampleData[index % sampleData.length];
+    if (index >= auctions.length) {
+      return const SizedBox.shrink();
+    }
 
-    return Container(
-      width: 160,
-      margin: const EdgeInsets.only(right: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF3282B8).withOpacity(0.1),
-            spreadRadius: 0,
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(16),
-                  ),
-                  image: DecorationImage(
-                    image: AssetImage(data['image']),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color:
-                        data['status'] == 'Hot'
-                            ? Colors.red
-                            : data['status'] == 'New'
-                            ? Colors.green
-                            : Colors.orange,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    data['status'],
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    final auction = auctions[index];
+    final currencyFormat = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    );
+
+    // Calculate time remaining
+    final now = DateTime.now();
+    final remaining = auction.deadline.difference(now);
+    String timeRemaining;
+    if (remaining.isNegative) {
+      timeRemaining = 'Berakhir';
+    } else if (remaining.inDays > 0) {
+      timeRemaining = '${remaining.inDays} hari lagi';
+    } else if (remaining.inHours > 0) {
+      timeRemaining = '${remaining.inHours} jam lagi';
+    } else {
+      timeRemaining = '${remaining.inMinutes} menit lagi';
+    }
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, '/auction/detail', arguments: auction);
+      },
+      child: Container(
+        width: 160,
+        margin: const EdgeInsets.only(right: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF3282B8).withOpacity(0.1),
+              spreadRadius: 0,
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
               children: [
-                Text(
-                  data['name'],
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Color(0xFF0F4C75),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  data['price'],
-                  style: const TextStyle(
-                    color: Color(0xFF3282B8),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.access_time,
-                      size: 14,
-                      color:
-                          data['status'] == 'Ending'
-                              ? Colors.red
-                              : Colors.grey[600],
+                Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
                     ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        data['time'],
-                        style: TextStyle(
-                          color:
-                              data['status'] == 'Ending'
-                                  ? Colors.red
-                                  : Colors.grey[600],
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
+                    ),
+                    child: Image.network(
+                      auction.imageUrl,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      errorBuilder:
+                          (context, error, stackTrace) => Container(
+                            color: Colors.grey[200],
+                            child: const Icon(Icons.broken_image),
+                          ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color:
+                          remaining.inHours <= 1
+                              ? Colors.red
+                              : auction.status == 'open'
+                              ? Colors.green
+                              : Colors.orange,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      remaining.inHours <= 1
+                          ? 'ENDING'
+                          : auction.status.toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ],
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    auction.title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Color(0xFF0F4C75),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    currencyFormat.format(double.parse(auction.currentPrice)),
+                    style: const TextStyle(
+                      color: Color(0xFF3282B8),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.access_time,
+                        size: 14,
+                        color:
+                            remaining.inHours <= 1
+                                ? Colors.red
+                                : Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          timeRemaining,
+                          style: TextStyle(
+                            color:
+                                remaining.inHours <= 1
+                                    ? Colors.red
+                                    : Colors.grey[600],
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
