@@ -67,26 +67,13 @@ flutter_launcher_icons:
 flutter_native_splash:
   color: "#0288D1"
   image: assets/images/logo.png
-  image_width: 200
-  image_height: 200
   
   # Android 12+ support
   android_12:
     image: assets/images/logo.png
     color: "#0288D1"
-    image_width: 200
-    image_height: 200
     
   # Web support
   web:
     image: assets/images/logo.png
     color: "#0288D1"
-    image_width: 200
-    image_height: 200
-    
-  # iOS support
-  ios:
-    image: assets/images/logo.png
-    color: "#0288D1"
-    image_width: 200
-    image_height: 200
