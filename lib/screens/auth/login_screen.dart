@@ -122,40 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: isButtonEnabled ? _onContinuePressed : null,
               label: 'Masuk',
             ),
-
-            const SizedBox(height: 16),
-            Center(
-              child: Text.rich(
-                TextSpan(
-                  text: 'Butuh bantuan? ',
-                  style: const TextStyle(color: Colors.black54),
-                  children: [
-                    TextSpan(
-                      text: 'Hubungi Kami',
-                      style: const TextStyle(
-                        color: Colors.teal,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
             const SizedBox(height: 8),
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  // Add navigation to forgot password screen
-                },
-                child: const Text(
-                  'Lupa Password?',
-                  style: TextStyle(
-                    color: Colors.teal,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),

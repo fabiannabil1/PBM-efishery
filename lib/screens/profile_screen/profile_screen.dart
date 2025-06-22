@@ -133,292 +133,289 @@ class _ProfileScreenState extends State<ProfileScreen> {
             );
           }
 
-          return Stack(
-            children: [
-              // Blue gradient background
-              Container(
-                height: MediaQuery.of(context).size.height * 0.4,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0xFF1E88E5), Color(0xFF64B5F6)],
-                  ),
-                ),
-              ),
-
-              // Main content
-              SafeArea(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      // Edit button
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.white),
-                              onPressed: () {
-                                Navigator.pushNamed(context, '/edit-profile');
-                              },
+          return SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Blue gradient background section
+                  Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0xFF1E88E5), Color(0xFF64B5F6)],
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        // Edit button
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.edit,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/edit-profile');
+                                },
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
-                      // Profile picture and name section
-                      Container(
-                        padding: const EdgeInsets.only(top: 16),
-                        child: Column(
-                          children: [
-                            Stack(
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white,
-                                      width: 4,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.2),
-                                        blurRadius: 10,
-                                        spreadRadius: 2,
-                                      ),
-                                    ],
-                                  ),
-                                  child: CircleAvatar(
-                                    radius: 60,
-                                    backgroundImage:
-                                        profile.profilePicture != null
-                                            ? NetworkImage(
-                                              profile.profilePicture!,
-                                            )
-                                            : const AssetImage(
-                                                  'assets/images/profil.png',
-                                                )
-                                                as ImageProvider,
-                                  ),
-                                ),
-                                Positioned(
-                                  bottom: 0,
-                                  right: 0,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: const BoxDecoration(
-                                      color: Colors.blue,
+                        // Profile picture and name section
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+                          child: Column(
+                            children: [
+                              Stack(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
                                       shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 4,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.2),
+                                          blurRadius: 10,
+                                          spreadRadius: 2,
+                                        ),
+                                      ],
+                                    ),
+                                    child: CircleAvatar(
+                                      radius: 60,
+                                      backgroundImage:
+                                          profile.profilePicture != null
+                                              ? NetworkImage(
+                                                profile.profilePicture!,
+                                              )
+                                              : const AssetImage(
+                                                    'assets/images/profil.png',
+                                                  )
+                                                  as ImageProvider,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              profile.name ?? 'No Name',
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              profile.bio ?? 'Bio',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Consumer<RoleChangeProvider>(
-                              builder: (context, roleChangeProvider, child) {
-                                return Column(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 8,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        profile.role ?? 'User',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                        ),
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.blue,
+                                        shape: BoxShape.circle,
                                       ),
                                     ),
-                                    if (profile.role?.toLowerCase() ==
-                                            'biasa' &&
-                                        !roleChangeProvider
-                                            .hasPendingRequest) ...[
-                                      const SizedBox(height: 12),
-                                      ElevatedButton.icon(
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder:
-                                                (context) =>
-                                                    const RequestRoleChangeDialog(),
-                                          );
-                                        },
-                                        icon: const Icon(
-                                          Icons.upgrade,
-                                          size: 18,
-                                        ),
-                                        label: const Text('Upgrade ke Mitra'),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          foregroundColor: Colors.blue,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 8,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              20,
-                                            ),
-                                          ),
-                                          elevation: 0,
-                                        ),
-                                      ),
-                                    ] else if (roleChangeProvider
-                                        .hasPendingRequest) ...[
-                                      const SizedBox(height: 12),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                profile.name ?? 'No Name',
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                profile.bio ?? 'Bio',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Consumer<RoleChangeProvider>(
+                                builder: (context, roleChangeProvider, child) {
+                                  return Column(
+                                    children: [
                                       Container(
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 16,
                                           vertical: 8,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: Colors.orange.withOpacity(0.2),
+                                          color: Colors.white.withOpacity(0.2),
                                           borderRadius: BorderRadius.circular(
                                             20,
                                           ),
-                                          border: Border.all(
-                                            color: Colors.orange.withOpacity(
-                                              0.3,
-                                            ),
+                                        ),
+                                        child: Text(
+                                          profile.role ?? 'User',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
                                           ),
                                         ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              Icons.pending_outlined,
-                                              size: 16,
-                                              color: Colors.orange.shade200,
+                                      ),
+                                      if (profile.role?.toLowerCase() ==
+                                              'biasa' &&
+                                          !roleChangeProvider
+                                              .hasPendingRequest) ...[
+                                        const SizedBox(height: 12),
+                                        ElevatedButton.icon(
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder:
+                                                  (context) =>
+                                                      const RequestRoleChangeDialog(),
+                                            );
+                                          },
+                                          icon: const Icon(
+                                            Icons.upgrade,
+                                            size: 18,
+                                          ),
+                                          label: const Text('Upgrade ke Mitra'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.white,
+                                            foregroundColor: Colors.blue,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 8,
                                             ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              roleChangeProvider
-                                                  .requestStatusText,
-                                              style: TextStyle(
-                                                color: Colors.orange.shade200,
-                                                fontSize: 12,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            elevation: 0,
+                                          ),
+                                        ),
+                                      ] else if (roleChangeProvider
+                                          .hasPendingRequest) ...[
+                                        const SizedBox(height: 12),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 8,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.orange.withOpacity(
+                                              0.2,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
+                                            border: Border.all(
+                                              color: Colors.orange.withOpacity(
+                                                0.3,
                                               ),
                                             ),
-                                          ],
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.pending_outlined,
+                                                size: 16,
+                                                color: Colors.orange.shade200,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                roleChangeProvider
+                                                    .requestStatusText,
+                                                style: TextStyle(
+                                                  color: Colors.orange.shade200,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
+                                      ],
                                     ],
-                                  ],
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 32),
-
-                      // Info cards
-                      Container(
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(32),
-                            topRight: Radius.circular(32),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            children: [
-                              _buildInfoCard(
-                                icon: Icons.phone,
-                                title: 'Phone Number',
-                                value: profile.phone ?? '-',
-                                iconColor: Colors.blue,
-                              ),
-                              const SizedBox(height: 16),
-                              _buildInfoCard(
-                                icon: Icons.location_on,
-                                title: 'Address',
-                                value: profile.address ?? '',
-                                iconColor: Colors.blue,
-                              ),
-                              const SizedBox(height: 32),
-
-                              // Action buttons
-                              _buildActionButton(
-                                onPressed: () {
-                                  Navigator.pushNamed(context, '/chat-list');
+                                  );
                                 },
-                                icon: Icons.chat_bubble_outline,
-                                label: 'Messages',
-                                color: Colors.blue,
-                              ),
-                              const SizedBox(height: 16),
-
-                              // Admin Article Management Button (only show for admin)
-                              if (profile.role?.toLowerCase() == 'admin') ...[
-                                _buildActionButton(
-                                  onPressed: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      '/articles/admin',
-                                    );
-                                  },
-                                  icon: Icons.article,
-                                  label: 'Kelola Artikel',
-                                  color: Colors.green,
-                                ),
-                                const SizedBox(height: 16),
-                              ],
-
-                              _buildActionButton(
-                                onPressed: () {
-                                  _showLogoutConfirmation();
-                                },
-                                icon: Icons.logout,
-                                label: 'Logout',
-                                color: Colors.red,
                               ),
                             ],
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+
+                  // White section with info cards
+                  Container(
+                    width: double.infinity,
+                    color: Colors.grey.shade50,
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          _buildInfoCard(
+                            icon: Icons.phone,
+                            title: 'Phone Number',
+                            value: profile.phone ?? '-',
+                            iconColor: Colors.blue,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildInfoCard(
+                            icon: Icons.location_on,
+                            title: 'Address',
+                            value: profile.address ?? '',
+                            iconColor: Colors.blue,
+                          ),
+                          const SizedBox(height: 32),
+
+                          // Action buttons
+                          _buildActionButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/chat-list');
+                            },
+                            icon: Icons.chat_bubble_outline,
+                            label: 'Messages',
+                            color: Colors.blue,
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Admin Article Management Button (only show for admin)
+                          if (profile.role?.toLowerCase() == 'admin') ...[
+                            _buildActionButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/articles/admin');
+                              },
+                              icon: Icons.article,
+                              label: 'Kelola Artikel',
+                              color: Colors.green,
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+
+                          _buildActionButton(
+                            onPressed: () {
+                              _showLogoutConfirmation();
+                            },
+                            icon: Icons.logout,
+                            label: 'Logout',
+                            color: Colors.red,
+                          ),
+
+                          // Bottom spacing
+                          const SizedBox(height: 32),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           );
         },
       ),
