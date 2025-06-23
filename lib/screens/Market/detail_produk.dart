@@ -1,4 +1,4 @@
-// screens/detail_produk.dart (Updated version with order success popup)
+// screens/detail_produk.dart (Updated with Success Popup)
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
@@ -465,7 +465,7 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
                           height: 56,
                           child: ElevatedButton(
                             onPressed:
-                                productProvider.isLoading
+                                orderProvider.isLoading
                                     ? null
                                     : () =>
                                         _processOrder(context, orderProvider),
@@ -478,7 +478,7 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
                               elevation: 2,
                             ),
                             child:
-                                productProvider.isLoading
+                                orderProvider.isLoading
                                     ? const SizedBox(
                                       width: 20,
                                       height: 20,
@@ -528,7 +528,7 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
                       ],
 
                       // Show error if exists
-                      if (productProvider.error != null) ...[
+                      if (orderProvider.error != null) ...[
                         const SizedBox(height: 12),
                         Container(
                           width: double.infinity,
@@ -544,13 +544,13 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  productProvider.error!,
+                                  orderProvider.error!,
                                   style: const TextStyle(color: Colors.red),
                                 ),
                               ),
                               TextButton(
                                 onPressed: () {
-                                  productProvider.clearError();
+                                  orderProvider.clearError();
                                 },
                                 child: const Text('Tutup'),
                               ),
@@ -708,7 +708,8 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
 
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      barrierDismissible: false, // Prevent dismissing by tapping outside
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Konfirmasi Pesanan'),
           content: Column(
@@ -752,203 +753,17 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => Navigator.of(dialogContext).pop(),
               child: const Text('Batal'),
             ),
             ElevatedButton(
-              onPressed: () async {
-                // Store the context before async operations
-                final navigatorContext = context;
-                
-                // Close confirmation dialog
-                Navigator.of(context).pop();
-
-                // Show loading dialog
-                if (!mounted) return;
-                await showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) {
-                    return WillPopScope(
-                      onWillPop: () async => false,
-                      child: const Dialog(
-                        child: Padding(
-                          padding: EdgeInsets.all(20.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CircularProgressIndicator(),
-                              SizedBox(width: 16),
-                              Text("Memproses pesanan..."),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                );
-
-                try {
-                  // Create order item
-                  final item = OrderItem(
-                    productId: widget.product.id!,
-                    productName: widget.product.name,
-                    quantity: quantity,
-                    unitPrice: widget.product.price.toDouble(),
-                    imageUrl: widget.product.imageUrl,
-                  );
-
-                  // Create order model
-                  final order = OrderModel(
-                    id: null,
-                    items: [item],
-                    totalPrice: totalPrice,
-                    paymentAmount: paymentAmount,
-                    change: paymentAmount - totalPrice,
-                    orderDate: DateTime.now(),
-                    status: 'completed',
-                  );
-
-                  // Add order to provider
-                  await orderProvider.addOrder(order);
-
-                  // Update local stock
-                  if (!mounted) return;
-                  setState(() {
-                    widget.product.stock -= quantity;
-                    quantity = 1;
-                    _paymentController.clear();
-                  });
-
-                  // Show success dialog and handle navigation
-                  if (!mounted) return;
-                  await showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (BuildContext context) => WillPopScope(
-                      onWillPop: () async => false,
-                      child: AlertDialog(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        title: Column(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: const BoxDecoration(
-                                color: Colors.green,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.check,
-                                color: Colors.white,
-                                size: 48,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Pesanan Berhasil!',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text(
-                              'Pesanan Anda telah berhasil dibuat dan sudah masuk ke sistem.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            const SizedBox(height: 20),
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[50],
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.grey[200]!),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Detail Pesanan:',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text('Produk: ${widget.product.name}'),
-                                  Text('Jumlah: ${order.items.first.quantity}'),
-                                  Text('Total: ${currencyFormat.format(order.totalPrice)}'),
-                                  Text('Pembayaran: ${currencyFormat.format(order.paymentAmount)}'),
-                                  Text(
-                                    'Kembalian: ${currencyFormat.format(order.change)}',
-                                    style: const TextStyle(
-                                      color: Colors.green,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        actions: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                    Navigator.of(navigatorContext).pop();
-                                  },
-                                  child: const Text('Kembali'),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                    Navigator.of(navigatorContext).pushReplacement(
-                                      MaterialPageRoute(
-                                        builder: (context) => const OrdersScreen(),
-                                      ),
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: const Text('Lihat Pesanan'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                } catch (error) {
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Gagal membuat pesanan: $error'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              },
+              onPressed:
+                  () => _handleOrderConfirmation(
+                    dialogContext,
+                    orderProvider,
+                    paymentAmount,
+                    totalPrice,
+                  ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 foregroundColor: Colors.white,
@@ -961,4 +776,295 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
     );
   }
 
+  Future<void> _handleOrderConfirmation(
+    BuildContext dialogContext,
+    OrderProvider orderProvider,
+    double paymentAmount,
+    double totalPrice,
+  ) async {
+    // Close dialog immediately
+    Navigator.of(dialogContext).pop();
+
+    try {
+      // Create order item
+      final item = OrderItem(
+        productId: widget.product.id!,
+        productName: widget.product.name,
+        quantity: quantity,
+        unitPrice: widget.product.price.toDouble(),
+        imageUrl: widget.product.imageUrl,
+      );
+
+      // Create order model
+      final order = OrderModel(
+        id: null,
+        items: [item],
+        totalPrice: totalPrice,
+        paymentAmount: paymentAmount,
+        change: paymentAmount - totalPrice,
+        orderDate: DateTime.now(),
+        status: 'completed',
+      );
+
+      // Add order to provider
+      await orderProvider.addOrder(order);
+
+      // Check if widget is still mounted before any UI operations
+      if (!mounted) return;
+
+      // Update local state
+      setState(() {
+        widget.product.stock -= quantity;
+        quantity = 1;
+        _paymentController.clear();
+      });
+
+      // Show success popup and navigate
+      _showSuccessPopupAndNavigate(paymentAmount, totalPrice);
+    } catch (error) {
+      // Show error if widget is still mounted
+      if (mounted) {
+        _showError('Gagal membuat pesanan: $error');
+      }
+    }
+  }
+
+  void _showSuccessPopupAndNavigate(double paymentAmount, double totalPrice) {
+    if (!mounted) return;
+
+    final currencyFormat = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    );
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.green[50]!, Colors.white],
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Success Animation Icon
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.3),
+                        blurRadius: 20,
+                        spreadRadius: 5,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.check, color: Colors.white, size: 50),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Success Title
+                const Text(
+                  'Pesanan Berhasil!',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 12),
+
+                // Success Message
+                Text(
+                  'Terima kasih telah berbelanja di toko kami',
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 24),
+
+                // Order Summary Card
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey[200]!),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.receipt_long,
+                            color: Colors.blue[600],
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Ringkasan Pesanan',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      _buildSummaryRow('Produk', widget.product.name),
+                      _buildSummaryRow('Jumlah', '$quantity item'),
+                      _buildSummaryRow(
+                        'Total',
+                        currencyFormat.format(totalPrice),
+                      ),
+                      _buildSummaryRow(
+                        'Pembayaran',
+                        currencyFormat.format(paymentAmount),
+                      ),
+
+                      const Divider(height: 20),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Kembalian',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.green,
+                            ),
+                          ),
+                          Text(
+                            currencyFormat.format(paymentAmount - totalPrice),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: Colors.green,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Action Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close dialog
+                          Navigator.of(
+                            context,
+                          ).pop(); // Go back to previous screen
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.grey[600],
+                          side: BorderSide(color: Colors.grey[300]!),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text('Kembali'),
+                      ),
+                    ),
+
+                    // const SizedBox(width: 12),
+
+                    // Expanded(
+                    //   child: ElevatedButton(
+                    //     onPressed: () {
+                    //       Navigator.of(context).pop(); // Close dialog
+                    //       Navigator.of(context).pushReplacement(
+                    //         MaterialPageRoute(
+                    //           builder: (context) => const OrdersScreen(),
+                    //         ),
+                    //       );
+                    //     },
+                    //     style: ElevatedButton.styleFrom(
+                    //       backgroundColor: Colors.green,
+                    //       foregroundColor: Colors.white,
+                    //       padding: const EdgeInsets.symmetric(vertical: 12),
+                    //       shape: RoundedRectangleBorder(
+                    //         borderRadius: BorderRadius.circular(8),
+                    //       ),
+                    //       elevation: 2,
+                    //     ),
+                    //     child: const Text(
+                    //       'Lihat Pesanan',
+                    //       style: TextStyle(fontWeight: FontWeight.bold),
+                    //     ),
+                    //   ),
+                    // ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSummaryRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
 }

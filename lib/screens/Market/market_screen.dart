@@ -188,7 +188,6 @@ class _MarketScreenState extends State<MarketScreen> {
                         color: Color(0xFF0F4C75),
                       ),
                     ),
-
                   ],
                 ),
                 const SizedBox(height: 0),
@@ -267,27 +266,27 @@ class _MarketScreenState extends State<MarketScreen> {
           children: [
             const Icon(Icons.shopping_cart, color: Colors.white),
             // Badge notifikasi
-            Positioned(
-              right: 0,
-              top: 0,
-              child: Container(
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                constraints: const BoxConstraints(minWidth: 12, minHeight: 12),
-                child: const Text(
-                  '2',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 8,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
+            // Positioned(
+            //   right: 0,
+            //   top: 0,
+            //   child: Container(
+            //     padding: const EdgeInsets.all(2),
+            //     decoration: BoxDecoration(
+            //       color: Colors.red,
+            //       borderRadius: BorderRadius.circular(8),
+            //     ),
+            //     constraints: const BoxConstraints(minWidth: 12, minHeight: 12),
+            //     child: const Text(
+            //       '2',
+            //       style: TextStyle(
+            //         color: Colors.white,
+            //         fontSize: 8,
+            //         fontWeight: FontWeight.bold,
+            //       ),
+            //       textAlign: TextAlign.center,
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),
@@ -422,4 +421,3 @@ class _MarketScreenState extends State<MarketScreen> {
   //     }
   //   }
 }
-

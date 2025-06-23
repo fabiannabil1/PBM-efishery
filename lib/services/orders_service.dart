@@ -9,15 +9,26 @@ import '../utils/token_storage.dart';
 
 class OrderService {
   static const String baseUrl = Constants.apiUrl;
-  static const Duration _timeout = Duration(seconds: 30);
+  static const Duration _timeout = Duration(seconds: 10);
 
-  // Ambil headers dengan token
+  static String? _cachedToken;
+  static DateTime? _tokenExpiry;
+
+  // Ambil headers dengan token (dengan caching)
   static Future<Map<String, String>> _getHeaders() async {
-    final token = await TokenStorage.getToken();
+    if (_cachedToken == null ||
+        _tokenExpiry == null ||
+        DateTime.now().isAfter(_tokenExpiry!)) {
+      _cachedToken = await TokenStorage.getToken();
+      _tokenExpiry = DateTime.now().add(
+        const Duration(minutes: 30),
+      ); // Cache token for 30 minutes
+    }
+
     return {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      if (token != null) 'Authorization': 'Bearer $token',
+      if (_cachedToken != null) 'Authorization': 'Bearer $_cachedToken',
     };
   }
 

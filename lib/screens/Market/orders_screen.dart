@@ -155,7 +155,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       ),
                       Expanded(
                         child: _buildSummaryItem(
-                          'Total Pendapatan',
+                          'Total Pengeluaran',
                           currencyFormat.format(orderProvider.totalRevenue),
                           Icons.monetization_on,
                         ),
@@ -358,7 +358,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     _buildDetailRow(
                       'Harga Satuan',
                       currencyFormat.format(
-                        order.items.isNotEmpty ? order.items.first.unitPrice : 0,
+                        order.items.isNotEmpty
+                            ? order.items.first.unitPrice
+                            : 0,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -612,7 +614,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       ),
                       const SizedBox(height: 12),
                       if (firstItem != null) ...[
-                        _buildDetailRow('Produk', order.items.first.productName),
+                        _buildDetailRow(
+                          'Produk',
+                          order.items.first.productName,
+                        ),
                         const SizedBox(height: 8),
                         _buildDetailRow('Jumlah', '${firstItem.quantity} item'),
                         const SizedBox(height: 8),
@@ -654,24 +659,24 @@ class _OrdersScreenState extends State<OrdersScreen> {
             ),
           ),
           actions: [
-          //   if (order.status == 'pending') ...[
-          //     TextButton(
-          //       onPressed: () {
-          //         Navigator.of(context).pop();
-          //         _updateOrderStatus(orderProvider, order.id!, 'completed');
-          //       },
-          //       style: TextButton.styleFrom(foregroundColor: Colors.green),
-          //       child: const Text('Selesaikan'),
-          //     ),
-          //     TextButton(
-          //       onPressed: () {
-          //         Navigator.of(context).pop();
-          //         _updateOrderStatus(orderProvider, order.id!, 'cancelled');
-          //       },
-          //       style: TextButton.styleFrom(foregroundColor: Colors.red),
-          //       child: const Text('Batalkan'),
-          //     ),
-          //   ],
+            //   if (order.status == 'pending') ...[
+            //     TextButton(
+            //       onPressed: () {
+            //         Navigator.of(context).pop();
+            //         _updateOrderStatus(orderProvider, order.id!, 'completed');
+            //       },
+            //       style: TextButton.styleFrom(foregroundColor: Colors.green),
+            //       child: const Text('Selesaikan'),
+            //     ),
+            //     TextButton(
+            //       onPressed: () {
+            //         Navigator.of(context).pop();
+            //         _updateOrderStatus(orderProvider, order.id!, 'cancelled');
+            //       },
+            //       style: TextButton.styleFrom(foregroundColor: Colors.red),
+            //       child: const Text('Batalkan'),
+            //     ),
+            //   ],
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Tutup'),

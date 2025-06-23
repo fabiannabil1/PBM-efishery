@@ -16,7 +16,8 @@ class OrderProvider with ChangeNotifier {
 
   // Statistik
   int get totalOrders => _orders.length;
-  double get totalRevenue => _orders.fold(0, (sum, order) => sum + order.totalPrice);
+  double get totalRevenue =>
+      _orders.fold(0, (sum, order) => sum + order.totalPrice);
   int get completedOrders => _orders.where((o) => o.status == 'paid').length;
   int get pendingOrders => _orders.where((o) => o.status == 'pending').length;
 
@@ -42,14 +43,14 @@ class OrderProvider with ChangeNotifier {
       OrderService.validateOrder(order);
 
       final created = await OrderService.createOrder(order);
-      _orders.insert(0, created);
 
-      notifyListeners();
+      // Add to local list immediately without extra notifyListeners
+      _orders.insert(0, created);
+      _setLoading(false);
     } catch (e) {
+      _setLoading(false);
       _setError('Gagal membuat order: ${e.toString()}');
       rethrow;
-    } finally {
-      _setLoading(false);
     }
   }
 
@@ -126,29 +127,39 @@ class OrderProvider with ChangeNotifier {
 
   // Filter & Search
   List<OrderModel> getOrdersByDate(DateTime date) {
-    return _orders.where((o) =>
-      o.orderDate.year == date.year &&
-      o.orderDate.month == date.month &&
-      o.orderDate.day == date.day).toList();
+    return _orders
+        .where(
+          (o) =>
+              o.orderDate.year == date.year &&
+              o.orderDate.month == date.month &&
+              o.orderDate.day == date.day,
+        )
+        .toList();
   }
 
   List<OrderModel> getOrdersByStatus(String status) =>
       _orders.where((o) => o.status == status).toList();
 
   List<OrderModel> getOrdersByDateRange(DateTime start, DateTime end) {
-    return _orders.where((o) =>
-      o.orderDate.isAfter(start.subtract(const Duration(days: 1))) &&
-      o.orderDate.isBefore(end.add(const Duration(days: 1)))
-    ).toList();
+    return _orders
+        .where(
+          (o) =>
+              o.orderDate.isAfter(start.subtract(const Duration(days: 1))) &&
+              o.orderDate.isBefore(end.add(const Duration(days: 1))),
+        )
+        .toList();
   }
 
   List<OrderModel> searchOrders(String query) {
     if (query.isEmpty) return _orders;
-    return _orders.where((o) =>
-      o.items.any((item) =>
-        item.productName.toLowerCase().contains(query.toLowerCase())
-      )
-    ).toList();
+    return _orders
+        .where(
+          (o) => o.items.any(
+            (item) =>
+                item.productName.toLowerCase().contains(query.toLowerCase()),
+          ),
+        )
+        .toList();
   }
 
   List<OrderModel> getOrdersPaginated(int page, int limit) {
@@ -179,9 +190,14 @@ class OrderProvider with ChangeNotifier {
     final thisMonth = DateTime(now.year, now.month);
 
     final todayOrders = getOrdersByDate(today);
-    final monthOrders = _orders.where((o) =>
-      o.orderDate.isAfter(thisMonth.subtract(const Duration(days: 1)))
-    ).toList();
+    final monthOrders =
+        _orders
+            .where(
+              (o) => o.orderDate.isAfter(
+                thisMonth.subtract(const Duration(days: 1)),
+              ),
+            )
+            .toList();
 
     return {
       'total_orders': totalOrders,
