@@ -188,6 +188,7 @@ class _MarketScreenState extends State<MarketScreen> {
                         color: Color(0xFF0F4C75),
                       ),
                     ),
+
                   ],
                 ),
                 const SizedBox(height: 0),
@@ -421,3 +422,4 @@ class _MarketScreenState extends State<MarketScreen> {
   //     }
   //   }
 }
+

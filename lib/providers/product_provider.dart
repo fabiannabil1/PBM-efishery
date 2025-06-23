@@ -37,7 +37,8 @@ class ProductProvider extends ChangeNotifier {
   Future<void> fetchProducts() async {
     try {
       final response = await http.get(
-        Uri.parse('http://efishery.acerkecil.my.id/api/products'),
+        // Uri.parse('http://efishery.acerkecil.my.id/api/products'),
+        Uri.parse('http://127.0.0.1:5000/api/products'),
       );
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
