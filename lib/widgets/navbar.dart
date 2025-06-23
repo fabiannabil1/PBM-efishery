@@ -9,7 +9,7 @@ class BottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 70, // Atur ketinggian di sini (default biasanya ~80)
+      height: 120, // Atur ketinggian di sini (default biasanya ~80)
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [

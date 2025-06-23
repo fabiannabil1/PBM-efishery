@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/article_provider.dart';
 import 'article_preview_card.dart';
-import '../../screens/artikel_screen/artikeluser_screen.dart';
+// import '../../screens/artikel_screen/artikeluser_screen.dart';
 
 class ArticlesSection extends StatelessWidget {
   const ArticlesSection({super.key});

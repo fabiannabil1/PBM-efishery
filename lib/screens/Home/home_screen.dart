@@ -167,16 +167,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           color: Color(0xFF0F4C75),
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF3282B8).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
+                      // Container(
+                      //   padding: const EdgeInsets.symmetric(
+                      //     horizontal: 12,
+                      //     vertical: 6,
+                      //   ),
+                      //   decoration: BoxDecoration(
+                      //     color: const Color(0xFF3282B8).withOpacity(0.1),
+                      //     borderRadius: BorderRadius.circular(20),
+                      //   ),
+                      // ),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -215,8 +215,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                       _buildEnhancedQuickActionButton(
                         context,
-                        'Scan',
-                        Icons.qr_code_scanner_outlined,
+                        'Jenis Ikan',
+                        Icons.document_scanner_rounded,
                         const Color(0xFF45B7D1),
                         const Color(0xFF45B7D1),
                         () => Navigator.pushNamed(context, '/scan'),
