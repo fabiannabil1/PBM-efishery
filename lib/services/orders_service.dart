@@ -11,24 +11,13 @@ class OrderService {
   static const String baseUrl = Constants.apiUrl;
   static const Duration _timeout = Duration(seconds: 10);
 
-  static String? _cachedToken;
-  static DateTime? _tokenExpiry;
-
-  // Ambil headers dengan token (dengan caching)
+  // Ambil headers dengan token
   static Future<Map<String, String>> _getHeaders() async {
-    if (_cachedToken == null ||
-        _tokenExpiry == null ||
-        DateTime.now().isAfter(_tokenExpiry!)) {
-      _cachedToken = await TokenStorage.getToken();
-      _tokenExpiry = DateTime.now().add(
-        const Duration(minutes: 30),
-      ); // Cache token for 30 minutes
-    }
-
+    final token = await TokenStorage.getToken();
     return {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      if (_cachedToken != null) 'Authorization': 'Bearer $_cachedToken',
+      if (token != null) 'Authorization': 'Bearer $token',
     };
   }
 

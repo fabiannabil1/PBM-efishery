@@ -42,8 +42,14 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => const LoginScreen());
 
       case AppRoutes.logout:
-        TokenStorage.deleteToken();
-        return MaterialPageRoute(builder: (_) => const LoginScreen());
+        return MaterialPageRoute(
+          builder: (_) {
+            TokenStorage.deleteToken().then((_) {
+              navigatorKey.currentState?.pushReplacementNamed(AppRoutes.login);
+            });
+            return const LoginScreen();
+          },
+        );
 
       case AppRoutes.home:
         return MaterialPageRoute(builder: (_) => const HomeScreen());

@@ -423,11 +423,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         currentIndex: 3,
         onTap: (index) {
           if (index == 0) {
-            Navigator.pushReplacementNamed(context, '/home');
+            Navigator.pushNamed(context, '/home');
           } else if (index == 1) {
-            Navigator.pushReplacementNamed(context, '/market');
+            Navigator.pushNamed(context, '/market');
           } else if (index == 2) {
-            Navigator.pushReplacementNamed(context, '/auctions/menu');
+            Navigator.pushNamed(context, '/auctions/menu');
           }
         },
       ),

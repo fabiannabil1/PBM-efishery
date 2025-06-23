@@ -249,11 +249,11 @@ class _MarketScreenState extends State<MarketScreen> {
         currentIndex: 1,
         onTap: (index) {
           if (index == 0) {
-            Navigator.pushReplacementNamed(context, '/home');
+            Navigator.pushNamed(context, '/home');
           } else if (index == 2) {
-            Navigator.pushReplacementNamed(context, '/auctions/menu');
+            Navigator.pushNamed(context, '/auctions/menu');
           } else if (index == 3) {
-            Navigator.pushReplacementNamed(context, '/profile');
+            Navigator.pushNamed(context, '/profile');
           }
         },
       ),

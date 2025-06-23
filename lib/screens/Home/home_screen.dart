@@ -386,11 +386,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           if (index == 0) {
             // Already in Home
           } else if (index == 1) {
-            Navigator.pushReplacementNamed(context, '/market');
+            Navigator.pushNamed(context, '/market');
           } else if (index == 2) {
-            Navigator.pushReplacementNamed(context, '/auctions/menu');
+            Navigator.pushNamed(context, '/auctions/menu');
           } else if (index == 3) {
-            Navigator.pushReplacementNamed(context, '/profile');
+            Navigator.pushNamed(context, '/profile');
           }
         },
       ),

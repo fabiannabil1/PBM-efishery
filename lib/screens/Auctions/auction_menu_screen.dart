@@ -101,11 +101,11 @@ class _AuctionMenuScreenState extends State<AuctionMenuScreen> {
         currentIndex: 2,
         onTap: (index) {
           if (index == 0) {
-            Navigator.pushReplacementNamed(context, '/home');
+            Navigator.pushNamed(context, '/home');
           } else if (index == 1) {
-            Navigator.pushReplacementNamed(context, '/market');
+            Navigator.pushNamed(context, '/market');
           } else if (index == 3) {
-            Navigator.pushReplacementNamed(context, '/profile');
+            Navigator.pushNamed(context, '/profile');
           }
         },
       ),
