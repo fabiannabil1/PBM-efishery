@@ -28,7 +28,7 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
     // Start auto-refresh when screen is opened
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
-      _auctionProvider?.startAutoRefresh();
+      // _auctionProvider?.startAutoRefresh();
     });
   }
 

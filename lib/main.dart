@@ -7,6 +7,7 @@ import 'providers/auth_provider.dart';
 import 'providers/auction_provider.dart';
 import 'providers/user_provider.dart';
 import 'providers/profile_provider.dart';
+import 'providers/role_change_provider.dart';
 import 'providers/article_provider.dart';
 import 'providers/fish_detection_provider.dart';
 import 'providers/product_provider.dart';
@@ -49,6 +50,7 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => ProfileProvider()..fetchProfile(),
         ),
+        ChangeNotifierProvider(create: (_) => RoleChangeProvider()),
         ChangeNotifierProvider(create: (_) => ArticleProvider()),
         ChangeNotifierProvider(create: (_) => FishDetectionProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),

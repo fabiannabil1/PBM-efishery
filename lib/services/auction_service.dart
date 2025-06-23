@@ -14,7 +14,7 @@ class AuctionService {
   Future<List<AuctionItem>> fetchAuctions() async {
     final token = await TokenStorage.getToken();
     final response = await http.get(
-      Uri.parse('$_baseUrl/api/auctions?page=1&per_page=10'),
+      Uri.parse('$_baseUrl/api/auctions?page=1&per_page=20'),
       headers: {
         // 'Content-Type': 'application/json',
         if (token != null)
@@ -35,7 +35,7 @@ class AuctionService {
   Future<List<AuctionItem>> fetchMyAuctions() async {
     final token = await TokenStorage.getToken();
     final response = await http.get(
-      Uri.parse('$_baseUrl/api/auctions/current?page=1&per_page=10'),
+      Uri.parse('$_baseUrl/api/auctions/current?page=1&per_page=20'),
       headers: {
         // 'Content-Type': 'application/json',
         if (token != null)
@@ -210,6 +210,60 @@ class AuctionService {
     } else {
       throw Exception(
         'Gagal Memuat Bid untuk Lelang ID $auctionId: ${response.statusCode}',
+      );
+    }
+  }
+
+  // Close auction and get winner info
+  Future<Map<String, dynamic>> closeAuction(int auctionId) async {
+    final token = await TokenStorage.getToken();
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/auctions/$auctionId/close'),
+      headers: {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return {
+        'success': true,
+        'message': data['message'],
+        'winner_id': data['winner_id'],
+      };
+    } else if (response.statusCode == 403) {
+      throw Exception('Tidak diizinkan menutup auction.');
+    } else if (response.statusCode == 404) {
+      throw Exception('Auction tidak ditemukan.');
+    } else {
+      throw Exception(
+        'Gagal menutup auction: ${response.statusCode} ${response.body}',
+      );
+    }
+  }
+
+  // Get highest bid for auction
+  Future<Map<String, dynamic>?> getHighestBid(int auctionId) async {
+    final token = await TokenStorage.getToken();
+    final response = await http.get(
+      Uri.parse('$_baseUrl/api/auctions/$auctionId/highest_bid'),
+      headers: {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data.containsKey('message')) {
+        // No bids yet
+        return null;
+      }
+      return data;
+    } else {
+      throw Exception(
+        'Gagal mendapatkan bid tertinggi: ${response.statusCode}',
       );
     }
   }

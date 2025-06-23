@@ -11,13 +11,13 @@ import 'dart:async';
 class ChatDetailScreen extends StatefulWidget {
   final int partnerId;
   final String partnerName;
-  final String partnerPhone;
+  final String? partnerPhone;
 
   const ChatDetailScreen({
     super.key,
     required this.partnerId,
     required this.partnerName,
-    required this.partnerPhone,
+    this.partnerPhone,
   });
 
   @override
@@ -137,6 +137,21 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     final message = _messageController.text.trim();
     if (message.isEmpty) return;
 
+    // Check if we have a phone number to send to
+    if (widget.partnerPhone == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Cannot send message: Partner phone number not available',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
     try {
       final token = Provider.of<AuthProvider>(context, listen: false).token;
       if (token == null) {
@@ -148,7 +163,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
       final result = await ChatService.sendMessage(
         token,
-        widget.partnerPhone,
+        widget.partnerPhone!,
         message,
       );
 

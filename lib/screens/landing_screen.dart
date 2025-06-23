@@ -19,13 +19,25 @@ class LandingScreen extends StatelessWidget {
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              children: [
-                Expanded(flex: 5, child: _buildHeader()),
-                Expanded(flex: 5, child: _buildBottomSection(context)),
-              ],
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight:
+                    MediaQuery.of(context).size.height -
+                    MediaQuery.of(context).padding.top -
+                    MediaQuery.of(context).padding.bottom,
+              ),
+              child: IntrinsicHeight(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    children: [
+                      Expanded(flex: 5, child: _buildHeader()),
+                      _buildBottomSection(context),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -37,56 +49,66 @@ class LandingScreen extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Logo eFishery
+        // Logo eFishery dengan background putih yang menonjol
         Container(
-          height: 120,
-          width: 120,
+          height: 140,
+          width: 140,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(30),
             boxShadow: [
               BoxShadow(
-                // ignore: deprecated_member_use
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 20,
+                spreadRadius: 2,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.white.withOpacity(0.1),
                 blurRadius: 10,
-                offset: const Offset(0, 4),
+                spreadRadius: -5,
+                offset: const Offset(0, -2),
               ),
             ],
           ),
-          child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
             child: Image.asset(
-              'assets/images/logo.png', // Pastikan logo tersedia di folder assets
-              width: 90,
-              height: 90,
+              'assets/images/logo.png', // Logo hijau kebiruan Anda
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
-                // Fallback jika gambar tidak tersedia
+                // Fallback icon dengan warna logo asli
                 return const Icon(
                   Icons.water,
-                  size: 70,
-                  color: Color(0xFF01579B),
+                  size: 60,
+                  color: Color(0xFF00BCD4), // Cyan untuk logo hijau kebiruan
                 );
               },
             ),
           ),
         ),
         const SizedBox(height: 32),
-        const Text(
-          'eFishery',
-          style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            letterSpacing: 1.2,
-          ),
-        ),
-        const SizedBox(height: 16),
+        // const Text(
+        //   'eFishery',
+        //   style: TextStyle(
+        //     fontSize: 32,
+        //     fontWeight: FontWeight.bold,
+        //     color: Colors.white,
+        //     letterSpacing: 1.2,
+        //   ),
+        // ),
+        // const SizedBox(height: 16),
         const Text(
           'Solusi Digital untuk Budidaya Perikanan Indonesia',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 16,
-            color: Colors.white,
+            color: Color.fromARGB(
+              255,
+              247,
+              247,
+              247,
+            ), // Warna teal sangat terang untuk subtitle
             letterSpacing: 0.5,
           ),
         ),
@@ -96,7 +118,7 @@ class LandingScreen extends StatelessWidget {
 
   Widget _buildBottomSection(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.only(
@@ -105,9 +127,8 @@ class LandingScreen extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            // ignore: deprecated_member_use
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 15,
             spreadRadius: 5,
             offset: const Offset(0, -5),
           ),
@@ -118,11 +139,11 @@ class LandingScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const Text(
-            'Selamat Datang di eFishery!',
+            'Selamat Datang!',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF01579B),
+              color: Color(0xFF01579B), // Biru tua untuk judul
             ),
             textAlign: TextAlign.center,
           ),
@@ -132,13 +153,13 @@ class LandingScreen extends StatelessWidget {
             style: TextStyle(fontSize: 14, color: Colors.black54),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 36),
+          const SizedBox(height: 28),
           ElevatedButton(
             onPressed: () {
               Navigator.pushNamed(context, AppRoutes.login);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0288D1),
+              backgroundColor: const Color(0xFF0288D1), // Biru muda
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
@@ -161,7 +182,7 @@ class LandingScreen extends StatelessWidget {
               Navigator.pushNamed(context, AppRoutes.register);
             },
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF0288D1),
+              foregroundColor: const Color(0xFF0288D1), // Biru muda
               side: const BorderSide(color: Color(0xFF0288D1), width: 1.5),
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
@@ -177,15 +198,15 @@ class LandingScreen extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildFeatureIcon(Icons.query_stats, 'Monitoring'),
+              _buildFeatureIcon(Icons.shop, 'Lelang'),
               const SizedBox(width: 24),
-              _buildFeatureIcon(Icons.notifications_active, 'Notifikasi'),
+              _buildFeatureIcon(Icons.shop_rounded, 'Marketplace'),
               const SizedBox(width: 24),
-              _buildFeatureIcon(Icons.support_agent, 'Dukungan'),
+              _buildFeatureIcon(Icons.article, 'Tips'),
             ],
           ),
         ],
@@ -199,10 +220,14 @@ class LandingScreen extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: const Color(0xFFE1F5FE),
+            color: const Color(0xFFE1F5FE), // Background biru sangat terang
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(icon, color: const Color(0xFF0288D1), size: 24),
+          child: Icon(
+            icon,
+            color: const Color(0xFF0288D1), // Biru muda untuk icon
+            size: 24,
+          ),
         ),
         const SizedBox(height: 8),
         Text(

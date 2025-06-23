@@ -27,6 +27,10 @@ class _MyAuctionState extends State<MyAuction> {
     });
   }
 
+  Future<void> _onRefresh() async {
+    await _auctionProvider?.loadMyAuctionItems();
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<AuctionProvider>(context);
@@ -55,22 +59,25 @@ class _MyAuctionState extends State<MyAuction> {
                     ),
                     const SizedBox(height: 10),
                     Expanded(
-                      child: GridView.builder(
-                        itemCount: filteredAuctions.length,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              childAspectRatio: 0.75,
-                              crossAxisSpacing: 10,
-                              mainAxisSpacing: 10,
-                            ),
-                        itemBuilder: (context, index) {
-                          final auction = filteredAuctions[index];
-                          return AuctionCard(
-                            item: auction,
-                            targetPage: '/my-auction/info',
-                          );
-                        },
+                      child: RefreshIndicator(
+                        onRefresh: _onRefresh,
+                        child: GridView.builder(
+                          itemCount: filteredAuctions.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                childAspectRatio: 0.75,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                              ),
+                          itemBuilder: (context, index) {
+                            final auction = filteredAuctions[index];
+                            return AuctionCard(
+                              item: auction,
+                              targetPage: '/my-auction/info',
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ],

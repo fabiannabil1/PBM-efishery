@@ -137,6 +137,7 @@ class AuctionProvider with ChangeNotifier {
       rethrow;
     }
   }
+
   Future<bool> deleteAuction(int auctionId) async {
     try {
       final result = await _auctionService.deleteAuction(auctionId);
@@ -147,6 +148,23 @@ class AuctionProvider with ChangeNotifier {
       rethrow;
     }
   }
-  
 
+  Future<Map<String, dynamic>> closeAuction(int auctionId) async {
+    try {
+      final result = await _auctionService.closeAuction(auctionId);
+      await loadAuctionItems();
+      await loadMyAuctionItems();
+      return result;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getHighestBid(int auctionId) async {
+    try {
+      return await _auctionService.getHighestBid(auctionId);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
