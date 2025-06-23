@@ -1,146 +1,197 @@
-// providers/order_provider.dart
-import 'package:flutter/material.dart';
-import '../models/orders.dart';
-import '../services/orders_service.dart';
+import 'package:flutter/foundation.dart';
+import '../../models/orders.dart';
+import '../../services/orders_service.dart';
 
-class OrderProvider extends ChangeNotifier {
-  final OrderService _orderService = OrderService();
-
+class OrderProvider with ChangeNotifier {
   List<OrderModel> _orders = [];
   bool _isLoading = false;
   String? _error;
+  OrderModel? _selectedOrder;
 
+  // Getters
   List<OrderModel> get orders => _orders;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  OrderModel? get selectedOrder => _selectedOrder;
 
-  // List<OrderModel> get orders => _orders;
+  // Statistik
+  int get totalOrders => _orders.length;
+  double get totalRevenue => _orders.fold(0, (sum, order) => sum + order.totalPrice);
+  int get completedOrders => _orders.where((o) => o.status == 'paid').length;
+  int get pendingOrders => _orders.where((o) => o.status == 'pending').length;
 
-  void addOrder(OrderModel order) {
-    _orders.add(order);
+  void _setLoading(bool value) {
+    _isLoading = value;
     notifyListeners();
   }
 
-  // Jika ingin fitur tambahan:
-  void clearOrders() {
-    _orders.clear();
+  void _setError(String? message) {
+    _error = message;
     notifyListeners();
   }
 
-  // Get orders sorted by date (newest first)
-  List<OrderModel> get sortedOrders {
-    final sorted = List<OrderModel>.from(_orders);
-    sorted.sort((a, b) => b.orderDate.compareTo(a.orderDate));
-    return sorted;
+  void clearError() {
+    _setError(null);
+  }
+
+  Future<void> addOrder(OrderModel order) async {
+    try {
+      _setLoading(true);
+      clearError();
+
+      OrderService.validateOrder(order);
+
+      final created = await OrderService.createOrder(order);
+      _orders.insert(0, created);
+
+      notifyListeners();
+    } catch (e) {
+      _setError('Gagal membuat order: ${e.toString()}');
+      rethrow;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   Future<void> fetchOrders() async {
     try {
-      _isLoading = true;
-      _error = null;
-      notifyListeners();
+      _setLoading(true);
+      clearError();
 
-      _orders = await _orderService.fetchOrders();
+      _orders = await OrderService.getAllOrders();
 
-      _isLoading = false;
       notifyListeners();
     } catch (e) {
-      _error = e.toString();
-      _isLoading = false;
-      notifyListeners();
+      _setError('Gagal mengambil data order: ${e.toString()}');
+    } finally {
+      _setLoading(false);
     }
   }
 
-  Future<bool> createOrder(OrderModel order) async {
+  Future<void> fetchOrderById(int id) async {
     try {
-      _isLoading = true;
-      _error = null;
+      _setLoading(true);
+      clearError();
+
+      final data = await OrderService.getOrderById(id);
+      _selectedOrder = data;
+
       notifyListeners();
+    } catch (e) {
+      _setError('Gagal mengambil order: ${e.toString()}');
+    } finally {
+      _setLoading(false);
+    }
+  }
 
-      final result = await _orderService.createOrder(order);
+  Future<void> updateOrderStatus(int id, String status) async {
+    try {
+      _setLoading(true);
+      clearError();
 
-      if (result) {
-        // Add order to local list without fetching all orders again
-        _orders.add(order);
-        notifyListeners();
+      final updated = await OrderService.updateOrderStatus(id, status);
+
+      final index = _orders.indexWhere((o) => o.id == id);
+      if (index != -1) {
+        _orders[index] = updated;
       }
 
-      _isLoading = false;
-      notifyListeners();
-      return result;
-    } catch (e) {
-      _error = e.toString();
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-  }
-
-  Future<OrderModel?> getOrderById(int id) async {
-    try {
-      return await _orderService.getOrderById(id);
-    } catch (e) {
-      _error = e.toString();
-      notifyListeners();
-      return null;
-    }
-  }
-
-  Future<bool> updateOrderStatus(int id, String status) async {
-    try {
-      _isLoading = true;
-      _error = null;
-      notifyListeners();
-
-      final result = await _orderService.updateOrderStatus(id, status);
-
-      if (result) {
-        // Update local order status
-        final orderIndex = _orders.indexWhere((order) => order.id == id);
-        if (orderIndex != -1) {
-          _orders[orderIndex] = OrderModel(
-            id: _orders[orderIndex].id,
-            productName: _orders[orderIndex].productName,
-            quantity: _orders[orderIndex].quantity,
-            unitPrice: _orders[orderIndex].unitPrice,
-            totalPrice: _orders[orderIndex].totalPrice,
-            paymentAmount: _orders[orderIndex].paymentAmount,
-            change: _orders[orderIndex].change,
-            orderDate: _orders[orderIndex].orderDate,
-            status: status,
-            imageUrl: _orders[orderIndex].imageUrl,
-          );
-        }
+      if (_selectedOrder?.id == id) {
+        _selectedOrder = updated;
       }
 
-      _isLoading = false;
       notifyListeners();
-      return result;
     } catch (e) {
-      _error = e.toString();
-      _isLoading = false;
-      notifyListeners();
-      return false;
+      _setError('Gagal update status: ${e.toString()}');
+    } finally {
+      _setLoading(false);
     }
   }
 
-  void clearError() {
+  Future<void> deleteOrder(int id) async {
+    try {
+      _setLoading(true);
+      clearError();
+
+      _orders.removeWhere((o) => o.id == id);
+      if (_selectedOrder?.id == id) _selectedOrder = null;
+
+      notifyListeners();
+    } catch (e) {
+      _setError('Gagal menghapus order: ${e.toString()}');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Filter & Search
+  List<OrderModel> getOrdersByDate(DateTime date) {
+    return _orders.where((o) =>
+      o.orderDate.year == date.year &&
+      o.orderDate.month == date.month &&
+      o.orderDate.day == date.day).toList();
+  }
+
+  List<OrderModel> getOrdersByStatus(String status) =>
+      _orders.where((o) => o.status == status).toList();
+
+  List<OrderModel> getOrdersByDateRange(DateTime start, DateTime end) {
+    return _orders.where((o) =>
+      o.orderDate.isAfter(start.subtract(const Duration(days: 1))) &&
+      o.orderDate.isBefore(end.add(const Duration(days: 1)))
+    ).toList();
+  }
+
+  List<OrderModel> searchOrders(String query) {
+    if (query.isEmpty) return _orders;
+    return _orders.where((o) =>
+      o.items.any((item) =>
+        item.productName.toLowerCase().contains(query.toLowerCase())
+      )
+    ).toList();
+  }
+
+  List<OrderModel> getOrdersPaginated(int page, int limit) {
+    final start = (page - 1) * limit;
+    final end = start + limit;
+    if (start >= _orders.length) return [];
+    return _orders.sublist(start, end > _orders.length ? _orders.length : end);
+  }
+
+  void clearOrders() {
+    _orders.clear();
+    _selectedOrder = null;
     _error = null;
     notifyListeners();
   }
 
-  // Get total revenue from completed orders
-  double get totalRevenue {
-    return _orders
-        .where((order) => order.status == 'completed')
-        .fold(0.0, (sum, order) => sum + order.totalPrice);
+  Future<void> refresh() async => fetchOrders();
+
+  List<OrderModel> getRecentOrders(int limit) {
+    final sorted = List<OrderModel>.from(_orders)
+      ..sort((a, b) => b.orderDate.compareTo(a.orderDate));
+    return sorted.take(limit).toList();
   }
 
-  // Get total orders count
-  int get totalOrdersCount => _orders.length;
+  Map<String, dynamic> getOrderStatistics() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final thisMonth = DateTime(now.year, now.month);
 
-  // Get orders by status
-  List<OrderModel> getOrdersByStatus(String status) {
-    return _orders.where((order) => order.status == status).toList();
+    final todayOrders = getOrdersByDate(today);
+    final monthOrders = _orders.where((o) =>
+      o.orderDate.isAfter(thisMonth.subtract(const Duration(days: 1)))
+    ).toList();
+
+    return {
+      'total_orders': totalOrders,
+      'today_orders': todayOrders.length,
+      'month_orders': monthOrders.length,
+      'total_revenue': totalRevenue,
+      'today_revenue': todayOrders.fold(0.0, (s, o) => s + o.totalPrice),
+      'month_revenue': monthOrders.fold(0.0, (s, o) => s + o.totalPrice),
+      'completed_orders': completedOrders,
+      'pending_orders': pendingOrders,
+    };
   }
 }

@@ -1,4 +1,4 @@
-// screens/detail_produk.dart (Updated version with better style and stock)
+// screens/detail_produk.dart (Updated version with order success popup)
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
@@ -10,6 +10,7 @@ import '../../providers/product_provider.dart';
 import '../../providers/orders_provider.dart';
 import '../../models/product.dart';
 import '../../models/orders.dart';
+import '../../models/order_item.dart';
 import 'orders_screen.dart';
 
 class DetailProdukScreen extends StatefulWidget {
@@ -166,7 +167,9 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
                           Expanded(
                             child: Text(
                               productName,
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              style: Theme.of(
+                                context,
+                              ).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black87,
                               ),
@@ -209,20 +212,27 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: widget.product.stock > 0 
-                              ? Colors.green.withOpacity(0.1)
-                              : Colors.red.withOpacity(0.1),
+                          color:
+                              widget.product.stock > 0
+                                  ? Colors.green.withOpacity(0.1)
+                                  : Colors.red.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: widget.product.stock > 0 ? Colors.green : Colors.red,
+                            color:
+                                widget.product.stock > 0
+                                    ? Colors.green
+                                    : Colors.red,
                           ),
                         ),
                         child: Text(
-                          widget.product.stock > 0 
-                              ? 'Tersedia (${widget.product.stock})' 
+                          widget.product.stock > 0
+                              ? 'Tersedia (${widget.product.stock})'
                               : 'Stok Habis',
                           style: TextStyle(
-                            color: widget.product.stock > 0 ? Colors.green : Colors.red,
+                            color:
+                                widget.product.stock > 0
+                                    ? Colors.green
+                                    : Colors.red,
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
                           ),
@@ -261,9 +271,8 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
                       // Description Section
                       Text(
                         'Deskripsi Produk',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Container(
@@ -292,9 +301,8 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
                       if (widget.product.stock > 0) ...[
                         Text(
                           'Jumlah',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 12),
                         Container(
@@ -313,7 +321,10 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.shopping_cart, color: Colors.blue),
+                              const Icon(
+                                Icons.shopping_cart,
+                                color: Colors.blue,
+                              ),
                               const SizedBox(width: 12),
                               const Text(
                                 'Jumlah pesanan:',
@@ -328,14 +339,15 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
                                 child: Row(
                                   children: [
                                     IconButton(
-                                      onPressed: quantity > 1
-                                          ? () {
-                                              setState(() {
-                                                quantity--;
-                                              });
-                                              HapticFeedback.selectionClick();
-                                            }
-                                          : null,
+                                      onPressed:
+                                          quantity > 1
+                                              ? () {
+                                                setState(() {
+                                                  quantity--;
+                                                });
+                                                HapticFeedback.selectionClick();
+                                              }
+                                              : null,
                                       icon: const Icon(Icons.remove),
                                       iconSize: 20,
                                       constraints: const BoxConstraints(
@@ -344,7 +356,9 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
                                       ),
                                     ),
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                      ),
                                       child: Text(
                                         quantity.toString(),
                                         style: const TextStyle(
@@ -354,14 +368,15 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
                                       ),
                                     ),
                                     IconButton(
-                                      onPressed: quantity < widget.product.stock
-                                          ? () {
-                                              setState(() {
-                                                quantity++;
-                                              });
-                                              HapticFeedback.selectionClick();
-                                            }
-                                          : null,
+                                      onPressed:
+                                          quantity < widget.product.stock
+                                              ? () {
+                                                setState(() {
+                                                  quantity++;
+                                                });
+                                                HapticFeedback.selectionClick();
+                                              }
+                                              : null,
                                       icon: const Icon(Icons.add),
                                       iconSize: 20,
                                       constraints: const BoxConstraints(
@@ -449,9 +464,11 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
                           width: double.infinity,
                           height: 56,
                           child: ElevatedButton(
-                            onPressed: productProvider.isLoading 
-                                ? null 
-                                : () => _processOrder(context, orderProvider),
+                            onPressed:
+                                productProvider.isLoading
+                                    ? null
+                                    : () =>
+                                        _processOrder(context, orderProvider),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
                               foregroundColor: Colors.white,
@@ -460,22 +477,26 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
                               ),
                               elevation: 2,
                             ),
-                            child: productProvider.isLoading 
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            child:
+                                productProvider.isLoading
+                                    ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                      ),
+                                    )
+                                    : const Text(
+                                      'Pesan Sekarang',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  )
-                                : const Text(
-                                    'Pesan Sekarang',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
                           ),
                         ),
                       ] else ...[
@@ -599,7 +620,8 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: valueStyle ??
+                  style:
+                      valueStyle ??
                       const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
@@ -630,7 +652,9 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
     if (quantity > widget.product.stock) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Jumlah melebihi stok yang tersedia (${widget.product.stock})'),
+          content: Text(
+            'Jumlah melebihi stok yang tersedia (${widget.product.stock})',
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -662,14 +686,19 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
     }
 
     // Show confirmation dialog
-    _showOrderConfirmationDialog(context, orderProvider, paymentAmount, totalPrice);
+    _showOrderConfirmationDialog(
+      context,
+      orderProvider,
+      paymentAmount,
+      totalPrice,
+    );
   }
 
   void _showOrderConfirmationDialog(
-    BuildContext context, 
-    OrderProvider orderProvider, 
-    double paymentAmount, 
-    double totalPrice
+    BuildContext context,
+    OrderProvider orderProvider,
+    double paymentAmount,
+    double totalPrice,
   ) {
     final currencyFormat = NumberFormat.currency(
       locale: 'id_ID',
@@ -688,7 +717,9 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
             children: [
               Text('Produk: ${widget.product.name}'),
               Text('Jumlah: $quantity'),
-              Text('Harga Satuan: ${currencyFormat.format(widget.product.price)}'),
+              Text(
+                'Harga Satuan: ${currencyFormat.format(widget.product.price)}',
+              ),
               const SizedBox(height: 8),
               Text(
                 'Total: ${currencyFormat.format(totalPrice)}',
@@ -727,43 +758,58 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
             ElevatedButton(
               onPressed: () async {
                 Navigator.of(context).pop();
-                
-                // Create order
-                final order = OrderModel(
-                  id: null,
-                  productName: widget.product.name,
-                  quantity: quantity,
-                  unitPrice: widget.product.price.toDouble(),
-                  totalPrice: totalPrice,
-                  paymentAmount: paymentAmount,
-                  change: paymentAmount - totalPrice,
-                  orderDate: DateTime.now(),
-                  status: 'completed',
-                  imageUrl: widget.product.imageUrl,
-                );
 
-                // Add order to provider
-                orderProvider.addOrder(order);
+                // Tampilkan loading dialog
+                _showLoadingDialog(context);
 
-                // Update stock (simulate stock reduction)
-                setState(() {
-                  widget.product.stock -= quantity;
-                  quantity = 1; // Reset quantity
-                  _paymentController.clear(); // Clear payment input
-                });
+                try {
+                  // Buat order item terlebih dahulu
+                  final item = OrderItem(
+                    productId: widget.product.id!,
+                    productName: widget.product.name,
+                    quantity: quantity,
+                    unitPrice: widget.product.price.toDouble(),
+                    imageUrl: widget.product.imageUrl,
+                  );
 
-                // Show success message
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Pesanan berhasil dibuat!'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
+                  // Buat order model dengan 1 item
+                  final order = OrderModel(
+                    id: null,
+                    items: [item],
+                    totalPrice: totalPrice,
+                    paymentAmount: paymentAmount,
+                    change: paymentAmount - totalPrice,
+                    orderDate: DateTime.now(),
+                    status: 'completed',
+                  );
 
-                // Navigate to orders screen
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => const OrdersScreen()),
-                );
+                  // Tambahkan order ke provider
+                  await orderProvider.addOrder(order);
+
+                  // Update stok lokal
+                  setState(() {
+                    widget.product.stock -= quantity;
+                    quantity = 1;
+                    _paymentController.clear();
+                  });
+
+                  // Tutup loading dialog
+                  Navigator.of(context).pop();
+
+                  // Tampilkan pop-up sukses
+                  _showOrderSuccessDialog(context, order, currencyFormat);
+
+                } catch (error) {
+                  // Tutup loading dialog jika ada error
+                  Navigator.of(context).pop();
+                  
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Gagal membuat pesanan: $error'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
@@ -776,4 +822,146 @@ class _DetailProdukScreenState extends State<DetailProdukScreen> {
       },
     );
   }
-} 
+
+  void _showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Dialog(
+          child: Padding(
+            padding: EdgeInsets.all(20.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: 16),
+                Text("Memproses pesanan..."),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showOrderSuccessDialog(BuildContext context, OrderModel order, NumberFormat currencyFormat) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
+                  color: Colors.green,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check,
+                  color: Colors.white,
+                  size: 48,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Pesanan Berhasil!',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Pesanan Anda telah berhasil dibuat dan sudah masuk ke sistem.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Detail Pesanan:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text('Produk: ${widget.product.name}'),
+                    Text('Jumlah: ${order.items.first.quantity}'),
+                    Text('Total: ${currencyFormat.format(order.totalPrice)}'),
+                    Text('Pembayaran: ${currencyFormat.format(order.paymentAmount)}'),
+                    Text(
+                      'Kembalian: ${currencyFormat.format(order.change)}',
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      // Kembali ke halaman sebelumnya atau home
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Kembali'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const OrdersScreen(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text('Lihat Pesanan'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+}

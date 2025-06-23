@@ -1,90 +1,137 @@
-// services/order_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/orders.dart';
+import '../models/order_item.dart';
+import '../utils/constants.dart';
+import '../utils/token_storage.dart';
 
 class OrderService {
-  static const String baseUrl = 'http://efishery.acerkecil.my.id';
+  static const String baseUrl = Constants.apiUrl;
 
-  Future<bool> createOrder(OrderModel order) async {
+  // Ambil headers dengan token
+  static Future<Map<String, String>> _getHeaders() async {
+    final token = await TokenStorage.getToken();
+    return {
+      'Content-Type': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+  }
+
+  // Validasi order sebelum dikirim ke API
+  static void validateOrder(OrderModel order) {
+    if (order.items.isEmpty) {
+      throw Exception('Order harus memiliki minimal satu produk');
+    }
+    for (var item in order.items) {
+      if (item.productName.isEmpty) throw Exception('Nama produk tidak boleh kosong');
+      if (item.quantity <= 0) throw Exception('Jumlah produk tidak valid');
+      if (item.unitPrice <= 0) throw Exception('Harga produk tidak valid');
+    }
+    if (order.totalPrice <= 0) {
+      throw Exception('Total harga tidak valid');
+    }
+  }
+
+  // Membuat order baru
+  static Future<OrderModel> createOrder(OrderModel order) async {
     try {
+      final headers = await _getHeaders();
+
+      final itemsPayload = order.items.map((item) => {
+        'product_id': item.productId,
+        'quantity': item.quantity,
+      }).toList();
+
+      final body = {
+        'items': itemsPayload,
+      };
+
       final response = await http.post(
-        Uri.parse('$baseUrl/orders'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(order.toJson()),
+        Uri.parse('$baseUrl/api/orders'),
+        headers: headers,
+        body: jsonEncode(body),
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return true;
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 201) {
+        return OrderModel.fromJson(responseData);
       } else {
-        print('Failed to create order. Status: ${response.statusCode}');
-        print('Response: ${response.body}');
-        return false;
+        throw Exception(responseData['error'] ?? 'Gagal membuat order');
       }
     } catch (e) {
-      print('Error creating order: $e');
-      return false;
+      throw Exception('Terjadi kesalahan saat membuat order: ${e.toString()}');
     }
   }
 
-  Future<List<OrderModel>> fetchOrders() async {
+  // Ambil semua order
+  static Future<List<OrderModel>> getAllOrders() async {
     try {
-      final response = await http.get(Uri.parse('http://efishery.acerkecil.my.id/api/orders'));
+      final headers = await _getHeaders();
 
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/orders'),
+        headers: headers,
+      );
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        return data.map((item) => OrderModel.fromJson(item)).toList();
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && responseData is List) {
+        return responseData.map<OrderModel>((json) => OrderModel.fromJson(json)).toList();
       } else {
-        print('Failed to fetch orders. Status: ${response.statusCode}');
-        return [];
+        throw Exception('Gagal mengambil data order');
       }
     } catch (e) {
-      print('Error fetching orders: $e');
-      return [];
+      throw Exception('Terjadi kesalahan saat mengambil data order: ${e.toString()}');
     }
   }
 
-  Future<OrderModel?> getOrderById(int id) async {
+  // Ambil order by ID
+  static Future<OrderModel> getOrderById(int id) async {
     try {
-      final response = await http.get(Uri.parse('http://efishery.acerkecil.my.id/api/orders'));
+      final headers = await _getHeaders();
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(response.body);
-        return OrderModel.fromJson(data);
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/orders/$id'),
+        headers: headers,
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && responseData is Map<String, dynamic>) {
+        return OrderModel.fromJson(responseData);
+      } else if (response.statusCode == 404) {
+        throw Exception('Order tidak ditemukan');
       } else {
-        print('Failed to get order. Status: ${response.statusCode}');
-        return null;
+        throw Exception(responseData['error'] ?? 'Gagal mengambil order');
       }
     } catch (e) {
-      print('Error getting order: $e');
-      return null;
+      throw Exception('Terjadi kesalahan saat mengambil order: ${e.toString()}');
     }
   }
 
-  Future<bool> updateOrderStatus(int id, String status) async {
+  // Update status order
+  static Future<OrderModel> updateOrderStatus(int id, String status) async {
     try {
+      final headers = await _getHeaders();
+
       final response = await http.put(
-        Uri.parse('$baseUrl/orders/$id'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'status': status,
-        }),
+        Uri.parse('$baseUrl/api/orders/$id/status'),
+        headers: headers,
+        body: jsonEncode({'status': status}),
       );
 
-      if (response.statusCode == 200) {
-        return true;
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && responseData is Map<String, dynamic>) {
+        return OrderModel.fromJson(responseData);
+      } else if (response.statusCode == 404) {
+        throw Exception('Order tidak ditemukan');
       } else {
-        print('Failed to update order status. Status: ${response.statusCode}');
-        return false;
+        throw Exception(responseData['error'] ?? 'Gagal update status order');
       }
     } catch (e) {
-      print('Error updating order status: $e');
-      return false;
+      throw Exception('Terjadi kesalahan saat update status: ${e.toString()}');
     }
   }
 }
